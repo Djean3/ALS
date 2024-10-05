@@ -82,6 +82,7 @@ st.plotly_chart(fig_avg)
 # Ensure the 'Obese' and 'Overweight' columns are correctly calculated based on BMI
 # Calculate new feature: Overweight and Obese based on BMI
 # Calculate new feature: Overweight and Obese based on BMI
+# Calculate new feature: Overweight and Obese based on BMI
 df['Overweight'] = df['BMI'].apply(lambda x: 1 if x > 25 else 0)
 df['Obese'] = df['BMI'].apply(lambda x: 1 if x > 30 else 0)
 
@@ -149,26 +150,19 @@ if not all_pre_mobility:
     )
     df = df[(df['Pre_Mobility'] >= pre_mobility[0]) & (df['Pre_Mobility'] <= pre_mobility[1])]
 
-# Function to generate dynamic statement
+# Function to generate dynamic statement with clarity on minimal improvements
 def generate_dynamic_statement(df, placebo_group, group_name):
     # Filter the group data (0: Trial Drug, 1: Placebo)
     group_df = df[df['Placebo'] == placebo_group]
     total_patients = group_df.shape[0]
     improved_patients = group_df[group_df['Improvement'] == 1].shape[0]
+    no_improvement_patients = total_patients - improved_patients
 
     # Calculate improvement percentage
     if total_patients > 0:
         improvement_percentage = (improved_patients / total_patients) * 100
     else:
         improvement_percentage = 0
-
-    # Determine the effect (positive, neutral, or negative)
-    if improvement_percentage > 50:
-        effect = "positive"
-    elif improvement_percentage == 50:
-        effect = "neutral"
-    else:
-        effect = "negative"
 
     # Create a list of selected filters for display
     selected_filters = []
@@ -186,10 +180,16 @@ def generate_dynamic_statement(df, placebo_group, group_name):
     # Join the filters into a coherent sentence
     filter_str = " and ".join([", ".join(selected_filters[:-1]), selected_filters[-1]]) if len(selected_filters) > 1 else selected_filters[0] if selected_filters else "all patients"
 
-    # Generate the result statement
-    return (
-        f"The {group_name} had a {effect} effect on mobility, with {improvement_percentage:.1f}% improvement for {total_patients} patients {filter_str}."
-    )
+    # Generate the result statement based on the effect
+    if improvement_percentage > 50:
+        return f"The {group_name} had a positive effect on mobility, with {improvement_percentage:.1f}% improvement for {total_patients} patients {filter_str}."
+    elif improvement_percentage == 50:
+        return f"The {group_name} had a neutral effect on mobility, with 50% of {total_patients} patients {filter_str} showing improvement."
+    else:
+        return (
+            f"The {group_name} was ineffective on the selected patients, with only {improvement_percentage:.1f}% ({improved_patients} of {total_patients} patients) experiencing mobility improvement "
+            f"who also {filter_str}."
+        )
 
 # Generate the statement for the trial drug group
 trial_drug_statement = generate_dynamic_statement(df, placebo_group=0, group_name="trial drug")
@@ -231,6 +231,7 @@ fig1 = px.bar(grouped_data,
              text=grouped_data['text'],  # Display percentage and patient count
              labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
              title='Patient Improvement Based on Clinical Trial Groups and Health Factors')
+
 
 # Display the chart in the Streamlit app
 st.plotly_chart(fig1)
