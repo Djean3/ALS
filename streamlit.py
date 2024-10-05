@@ -151,7 +151,7 @@ if not all_pre_mobility:
     )
     df = df[(df['Pre_Mobility'] >= pre_mobility[0]) & (df['Pre_Mobility'] <= pre_mobility[1])]
 
-# Function to generate dynamic statement with clarity on minimal improvements
+# Function to generate dynamic statement with clarity on minimal improvementss
 def generate_dynamic_statement(df, placebo_group, group_name):
     # Filter the group data (0: Trial Drug, 1: Placebo)
     group_df = df[df['Placebo'] == placebo_group]
