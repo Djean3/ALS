@@ -122,6 +122,15 @@ st.plotly_chart(fig)
 # Calculate new feature: Overweight based on BMI (>25 is considered overweight)
 df['Overweight'] = df['BMI'].apply(lambda x: 1 if x > 25 else 0)
 
+# Add gender filter (All, Male, Female)
+gender = st.selectbox("Select Gender", options=["All", "Male", "Female"])
+
+# Filter based on gender
+if gender == "Male":
+    df = df[df['Sex'] == 1]  # 1 represents Male in the dataset
+elif gender == "Female":
+    df = df[df['Sex'] == 0]  # 0 represents Female in the dataset
+
 # Add checkboxes for filtering
 family_history = st.checkbox("Has Family History", value=True)
 prior_health_issues = st.checkbox("Had Prior Serious Health Issues", value=True)
@@ -167,14 +176,13 @@ fig = px.bar(grouped_data,
              barmode='stack',  # Stacked bar chart
              text=grouped_data['Percentage'].apply(lambda x: f'{x:.1f}%'),
              labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
-             title='Improvement Across Placebo and Trial Groups')
+             title=f'Improvement Across Placebo and Trial Groups ({gender})')
 
 # Update the layout to display text on the bars
 fig.update_traces(textposition='inside', textfont_size=12)
 
 # Display the bar chart in the Streamlit app
 st.plotly_chart(fig)
-
 
 
 ##################################################################
