@@ -192,56 +192,25 @@ st.plotly_chart(fig_patient)
 #############################################################################
 ######## IMPROVEMENT DONUT CHART ##################################
 
-# Mapping Placebo values to "Trial Drug" and "Placebo"
-df['Placebo'] = df['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
-
-# Grouping data to get counts for Placebo and Improvement
+# Group data by Placebo and Improvement
 grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
 
-# Prepare data for each group
-placebo_data = grouped_data[grouped_data['Placebo'] == 'Placebo']
-trial_drug_data = grouped_data[grouped_data['Placebo'] == 'Trial Drug']
+# Mapping placebo values to "Trial Drug" and "Placebo"
+df['Placebo'] = df['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
 
-# Data for inner circle (Placebo vs Trial Drug)
-placebo_vs_trial = df['Placebo'].value_counts()
+# Map Improvement values for better labeling
+grouped_data['Improvement'] = grouped_data['Improvement'].map({0: 'Not Improved', 1: 'Improved'})
 
-# Define colors for the chart
-colors = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA']
+# Create the grouped bar chart
+fig = px.bar(grouped_data, 
+             x='Placebo', 
+             y='Count', 
+             color='Improvement', 
+             barmode='group',
+             labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
+             title='Improvement Across Placebo and Trial Groups')
 
-# Create the donut chart
-fig = go.Figure()
-
-# Inner donut (Placebo vs Trial Drug)
-fig.add_trace(go.Pie(
-    labels=placebo_vs_trial.index,
-    values=placebo_vs_trial.values,
-    hole=0.5,
-    textinfo='label+percent',
-    marker=dict(colors=[colors[0], colors[1]]),
-    name='Trial Group',
-    pull=[0.05, 0.05],  # Add separation between inner slices
-    showlegend=True
-))
-
-# Outer donut (Improvement within each group)
-fig.add_trace(go.Pie(
-    labels=grouped_data.apply(lambda row: 'Improved' if row['Improvement'] == 1 else 'Not Improved', axis=1),
-    values=grouped_data['Count'],
-    hole=0.7,
-    textinfo='label+percent',
-    marker=dict(colors=[colors[0], colors[0], colors[1], colors[1]]),
-    name='Improvement',
-    pull=[0.05, 0.05, 0.05, 0.05],  # Add separation between outer slices
-    showlegend=True
-))
-
-# Update the layout for better presentation
-fig.update_layout(
-    title_text='Improvement Across Placebo and Trial Groups',
-    annotations=[dict(text='Trial Groups', x=0.5, y=0.5, font_size=20, showarrow=False)],
-)
-
-# Display the chart in the Streamlit app
+# Display the bar chart in the Streamlit app
 st.plotly_chart(fig)
 
 
