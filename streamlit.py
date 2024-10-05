@@ -116,7 +116,68 @@ st.plotly_chart(fig)
 
 
 
+#####################################################################
 
+
+# Calculate new feature: Overweight based on BMI (>25 is considered overweight)
+df['Overweight'] = df['BMI'].apply(lambda x: 1 if x > 25 else 0)
+
+# Add checkboxes for filtering
+family_history = st.checkbox("Has Family History", value=True)
+prior_health_issues = st.checkbox("Had Prior Serious Health Issues", value=True)
+smoker = st.checkbox("Is Smoker", value=True)
+
+# Filter based on checkboxes
+if family_history:
+    df = df[df['Family_History'] == 1]
+if prior_health_issues:
+    df = df[df['Prior_Serious_Health_Issues'] == 1]
+if smoker:
+    df = df[df['Smoker'] == 1]
+
+# Filter by diagnosis length (convert to years)
+df['Diagnosis_Length_Years'] = df['Diagnosis_Length_months'] // 12
+
+# Create a slider for diagnosis length (years)
+diagnosis_years = st.slider("Select Diagnosis Length (Years)", 0, 10, (0, 10))
+
+# Filter based on diagnosis length
+df = df[(df['Diagnosis_Length_Years'] >= diagnosis_years[0]) & (df['Diagnosis_Length_Years'] <= diagnosis_years[1])]
+
+# Group data by Placebo and Improvement
+grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
+
+# Calculate the total count for each Placebo group
+grouped_data['Total'] = grouped_data.groupby('Placebo')['Count'].transform('sum')
+
+# Calculate the percentage of patients in each group
+grouped_data['Percentage'] = (grouped_data['Count'] / grouped_data['Total']) * 100
+
+# Map Improvement values for better labeling
+grouped_data['Improvement'] = grouped_data['Improvement'].map({0: 'Not Improved', 1: 'Improved'})
+
+# Map Placebo values for better labeling (0: Trial Drug, 1: Placebo)
+grouped_data['Placebo'] = grouped_data['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
+
+# Create the stacked bar chart with percentages as text on the bars
+fig = px.bar(grouped_data, 
+             x='Placebo', 
+             y='Count', 
+             color='Improvement', 
+             barmode='stack',  # Stacked bar chart
+             text=grouped_data['Percentage'].apply(lambda x: f'{x:.1f}%'),
+             labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
+             title='Improvement Across Placebo and Trial Groups')
+
+# Update the layout to display text on the bars
+fig.update_traces(textposition='inside', textfont_size=12)
+
+# Display the bar chart in the Streamlit app
+st.plotly_chart(fig)
+
+
+
+##################################################################
 
 
 
