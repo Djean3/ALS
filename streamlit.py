@@ -168,13 +168,15 @@ grouped_data['Improvement'] = grouped_data['Improvement'].map({0: 'Not Improved'
 # Map Placebo values for better labeling (0: Trial Drug, 1: Placebo)
 grouped_data['Placebo'] = grouped_data['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
 
-# Create the stacked bar chart with percentages as text on the bars
+# Create the stacked bar chart with percentages and patient count as text on the bars
+grouped_data['text'] = grouped_data.apply(lambda row: f"{row['Percentage']:.1f}% - {row['Count']} patients", axis=1)
+
 fig = px.bar(grouped_data, 
              x='Placebo', 
              y='Count', 
              color='Improvement', 
              barmode='stack',  # Stacked bar chart
-             text=grouped_data['Percentage'].apply(lambda x: f'{x:.1f}%'),
+             text=grouped_data['text'],  # Display percentage and patient count
              labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
              title=f'Improvement Across Placebo and Trial Groups ({gender})')
 
