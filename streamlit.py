@@ -71,47 +71,6 @@ st.plotly_chart(fig_patient)
 
 #############################################################################
 ######## IMPROVEMENT DONUT CHART ##################################
-# Group data by Placebo and Improvement
-
-# Add a gender filter using a selectbox
-gender = st.selectbox("Select Gender", options=["All", "Male", "Female"])
-
-# Filter the data based on the selected gender
-if gender == "Male":
-    df = df[df['Sex'] == 1]  # 1 represents Male in the dataset
-elif gender == "Female":
-    df = df[df['Sex'] == 0]  # 0 represents Female in the dataset
-
-# Group data by Placebo and Improvement
-grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
-
-# Calculate the total count for each Placebo group
-grouped_data['Total'] = grouped_data.groupby('Placebo')['Count'].transform('sum')
-
-# Calculate the percentage of patients in each group
-grouped_data['Percentage'] = (grouped_data['Count'] / grouped_data['Total']) * 100
-
-# Map Improvement values for better labeling
-grouped_data['Improvement'] = grouped_data['Improvement'].map({0: 'Not Improved', 1: 'Improved'})
-
-# Map Placebo values for better labeling (0: Trial Drug, 1: Placebo)
-grouped_data['Placebo'] = grouped_data['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
-
-# Create the stacked bar chart with percentages as text on the bars
-fig = px.bar(grouped_data, 
-             x='Placebo', 
-             y='Count', 
-             color='Improvement', 
-             barmode='stack',  # Stacked bar chart
-             text=grouped_data['Percentage'].apply(lambda x: f'{x:.1f}%'),
-             labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
-             title=f'Improvement Across Placebo and Trial Groups ({gender})')
-
-# Update the layout to display text on the bars
-fig.update_traces(textposition='inside', textfont_size=12)
-
-# Display the bar chart in the Streamlit app
-st.plotly_chart(fig)
 
 
 
