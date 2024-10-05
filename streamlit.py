@@ -137,3 +137,25 @@ df = pd.DataFrame(data, columns=columns)
 # Display the DataFrame in the Streamlit app
 st.write("ALS Trial Data")
 st.dataframe(df)
+
+
+# Markdown data dictionary
+data_dictionary = """
+### Data Dictionary
+
+- **Patient_ID**: A unique identifier for each patient.
+- **Placebo**: Indicates if the patient received a placebo (1 = Yes, 0 = No).
+- **Family_History**: Indicates if the patient has a family history of the disease (1 = Yes, 0 = No).
+- **Prior_Serious_Health_Issues**: Indicates if the patient had serious health issues prior to the trial (1 = Yes, 0 = No).
+- **Sex**: Gender of the patient (0 = Female, 1 = Male).
+- **Height_in_inches**: The height of the patient in inches.
+- **Weight_in_pounds**: The weight of the patient in pounds.
+- **Smoker**: Indicates if the patient is a smoker (1 = Yes, 0 = No).
+- **Diagnosis_Length_months**: The length of time since diagnosis in months.
+- **Pre_Mobility**: The patient’s mobility score before the trial.
+- **Trial_Avg_Mobility**: The average mobility score of the patient across all months of the trial.
+- **Improvement**: Indicates if the patient showed improvement in mobility (1 = Yes, 0 = No).
+"""
+
+# Add the markdown to the app
+st.markdown(data_dictionary)
