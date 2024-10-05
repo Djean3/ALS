@@ -122,8 +122,8 @@ st.plotly_chart(fig)
 # Calculate new feature: Overweight based on BMI (>25 is considered overweight)
 df['Overweight'] = df['BMI'].apply(lambda x: 1 if x > 25 else 0)
 
-# Add gender filter (All, Male, Female)
-gender = st.selectbox("Select Gender", options=["All", "Male", "Female"])
+# Add gender filter (All, Male, Female) with a unique key
+gender = st.selectbox("Select Gender", options=["All", "Male", "Female"], key="gender_select")
 
 # Filter based on gender
 if gender == "Male":
@@ -131,10 +131,10 @@ if gender == "Male":
 elif gender == "Female":
     df = df[df['Sex'] == 0]  # 0 represents Female in the dataset
 
-# Add checkboxes for filtering
-family_history = st.checkbox("Has Family History", value=True)
-prior_health_issues = st.checkbox("Had Prior Serious Health Issues", value=True)
-smoker = st.checkbox("Is Smoker", value=True)
+# Add checkboxes for filtering with unique keys
+family_history = st.checkbox("Has Family History", value=True, key="family_history")
+prior_health_issues = st.checkbox("Had Prior Serious Health Issues", value=True, key="prior_health_issues")
+smoker = st.checkbox("Is Smoker", value=True, key="smoker")
 
 # Filter based on checkboxes
 if family_history:
@@ -147,8 +147,8 @@ if smoker:
 # Filter by diagnosis length (convert to years)
 df['Diagnosis_Length_Years'] = df['Diagnosis_Length_months'] // 12
 
-# Create a slider for diagnosis length (years)
-diagnosis_years = st.slider("Select Diagnosis Length (Years)", 0, 10, (0, 10))
+# Create a slider for diagnosis length (years) with a unique key
+diagnosis_years = st.slider("Select Diagnosis Length (Years)", 0, 10, (0, 10), key="diagnosis_years_slider")
 
 # Filter based on diagnosis length
 df = df[(df['Diagnosis_Length_Years'] >= diagnosis_years[0]) & (df['Diagnosis_Length_Years'] <= diagnosis_years[1])]
