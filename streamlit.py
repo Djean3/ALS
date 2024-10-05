@@ -71,6 +71,7 @@ st.plotly_chart(fig_patient)
 
 #############################################################################
 ######## IMPROVEMENT DONUT CHART ##################################
+# Group data by Placebo and Improvement
 grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
 
 # Map Improvement values for better labeling
@@ -79,18 +80,17 @@ grouped_data['Improvement'] = grouped_data['Improvement'].map({0: 'Not Improved'
 # Map Placebo values for better labeling (0: Trial Drug, 1: Placebo)
 grouped_data['Placebo'] = grouped_data['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
 
-# Create the grouped bar chart
+# Create the stacked bar chart
 fig = px.bar(grouped_data, 
              x='Placebo', 
              y='Count', 
              color='Improvement', 
-             barmode='group',
+             barmode='stack',  # Switch to stacked bar chart
              labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
              title='Improvement Across Placebo and Trial Groups')
 
 # Display the bar chart in the Streamlit app
 st.plotly_chart(fig)
-
 
 
 
