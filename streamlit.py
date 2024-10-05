@@ -13,8 +13,9 @@ family history, prior health issues, and placebo group status.
 Scroll down to view detailed patient data and overall trial results.
 
 [Go to Data Dictionary](#data-dictionary)
-"""
 
+_This survey has no medical value and was created with synthetic data for demonstration purposes only._
+"""
 
 
 url = "https://raw.githubusercontent.com/Djean3/ALS/main/ALS_trial_data.csv"
