@@ -199,17 +199,12 @@ trial_drug_statement = generate_dynamic_statement(df, placebo_group=0, group_nam
 placebo_statement = generate_dynamic_statement(df, placebo_group=1, group_name="placebo")
 
 # Display the statements in the app
-st.write(trial_drug_statement)
-st.write("")
-st.write(placebo_statement)
+
 
 # Add a space before the placebo statement
 st.write("")
 
-# Generate the statement for the placebo group
-placebo_statement = generate_dynamic_statement(df, placebo_group=1, group_name="placebo")
-# Display the placebo statement
-st.write(placebo_statement)
+
 
 # Group data by Placebo and Improvement for the first chart
 grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
@@ -242,6 +237,10 @@ fig1 = px.bar(grouped_data,
 
 # Display the chart in the Streamlit app
 st.plotly_chart(fig1)
+st.write("")
+st.write(trial_drug_statement)
+st.write("")
+st.write(placebo_statement)
 ##################################################################
 
 
