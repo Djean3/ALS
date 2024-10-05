@@ -86,36 +86,41 @@ st.plotly_chart(fig_avg)
 df['Overweight'] = df['BMI'].apply(lambda x: 1 if x > 25 else 0)
 df['Obese'] = df['BMI'].apply(lambda x: 1 if x > 30 else 0)
 
-# Add gender filter (All, Male, Female) with a unique key
-gender = st.selectbox("Select Gender", options=["All", "Male", "Female"], key="gender_select")
+# Add "All Patients" checkbox
+all_patients = st.checkbox("All Patients", value=True, key="all_patients")
 
-# Use columns to arrange checkboxes horizontally
-col1, col2 = st.columns(2)
+# Disable other filters if "All Patients" is selected
+if not all_patients:
+    # Add gender filter (All, Male, Female) with a unique key
+    gender = st.selectbox("Select Gender", options=["All", "Male", "Female"], key="gender_select")
 
-with col1:
-    # Checkbox in the first column
-    family_history = st.checkbox("Has Family History", value=True, key="family_history")
-    is_obese = st.checkbox("Is Obese (BMI > 30)", value=True, key="is_obese")
+    # Use columns to arrange checkboxes horizontally
+    col1, col2 = st.columns(2)
 
-with col2:
-    # Checkboxes in the second column
-    prior_health_issues = st.checkbox("Had Prior Serious Health Issues", value=True, key="prior_health_issues")
-    smoker = st.checkbox("Is Smoker", value=True, key="smoker")
+    with col1:
+        # Checkbox in the first column
+        family_history = st.checkbox("Has Family History", value=False, key="family_history")
+        is_obese = st.checkbox("Is Obese (BMI > 30)", value=False, key="is_obese")
 
-# Apply filters based on checkboxes and dropdowns
-if gender == "Male":
-    df = df[df['Sex'] == 1]  # 1 represents Male
-elif gender == "Female":
-    df = df[df['Sex'] == 0]  # 0 represents Female
+    with col2:
+        # Checkboxes in the second column
+        prior_health_issues = st.checkbox("Had Prior Serious Health Issues", value=False, key="prior_health_issues")
+        smoker = st.checkbox("Is Smoker", value=False, key="smoker")
 
-if family_history:
-    df = df[df['Family_History'] == 1]
-if prior_health_issues:
-    df = df[df['Prior_Serious_Health_Issues'] == 1]
-if smoker:
-    df = df[df['Smoker'] == 1]
-if is_obese:
-    df = df[df['Obese'] == 1]
+    # Apply filters based on checkboxes and dropdowns
+    if gender == "Male":
+        df = df[df['Sex'] == 1]  # 1 represents Male
+    elif gender == "Female":
+        df = df[df['Sex'] == 0]  # 0 represents Female
+
+    if family_history:
+        df = df[df['Family_History'] == 1]
+    if prior_health_issues:
+        df = df[df['Prior_Serious_Health_Issues'] == 1]
+    if smoker:
+        df = df[df['Smoker'] == 1]
+    if is_obese:
+        df = df[df['Obese'] == 1]
 
 # Filter by diagnosis length (convert to years)
 df['Diagnosis_Length_Years'] = df['Diagnosis_Length_months'] // 12
@@ -166,16 +171,17 @@ def generate_dynamic_statement(df, placebo_group, group_name):
 
     # Create a list of selected filters for display
     selected_filters = []
-    if gender != "All":
-        selected_filters.append(f"{gender.lower()}")
-    if family_history:
-        selected_filters.append("with a family history")
-    if prior_health_issues:
-        selected_filters.append("with prior serious health issues")
-    if smoker:
-        selected_filters.append("who are smokers")
-    if is_obese:
-        selected_filters.append("who are obese")
+    if not all_patients:  # Only show filters if "All Patients" is unchecked
+        if gender != "All":
+            selected_filters.append(f"{gender.lower()}")
+        if family_history:
+            selected_filters.append("with a family history")
+        if prior_health_issues:
+            selected_filters.append("with prior serious health issues")
+        if smoker:
+            selected_filters.append("who are smokers")
+        if is_obese:
+            selected_filters.append("who are obese")
 
     # Correctly form the filter string
     if selected_filters:
@@ -194,17 +200,18 @@ def generate_dynamic_statement(df, placebo_group, group_name):
             f"who also {filter_str}."
         )
 
-# Example of generating statements for trial drug and placebo groups:
+# Generate the statement for the trial drug group
 trial_drug_statement = generate_dynamic_statement(df, placebo_group=0, group_name="trial drug")
-placebo_statement = generate_dynamic_statement(df, placebo_group=1, group_name="placebo")
-
-# Display the statements in the app
-
+# Display the trial drug statement
+st.write(trial_drug_statement)
 
 # Add a space before the placebo statement
 st.write("")
 
-
+# Generate the statement for the placebo group
+placebo_statement = generate_dynamic_statement(df, placebo_group=1, group_name="placebo")
+# Display the placebo statement
+st.write(placebo_statement)
 
 # Group data by Placebo and Improvement for the first chart
 grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
@@ -234,13 +241,8 @@ fig1 = px.bar(grouped_data,
              labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
              title='Patient Improvement Based on Clinical Trial Groups and Health Factors')
 
-
 # Display the chart in the Streamlit app
 st.plotly_chart(fig1)
-st.write("")
-st.write(trial_drug_statement)
-st.write("")
-st.write(placebo_statement)
 ##################################################################
 
 
