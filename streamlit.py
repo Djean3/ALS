@@ -80,8 +80,9 @@ st.plotly_chart(fig_avg)
 # Calculate new feature: Overweight and Obese based on BMI
 # Add gender filter (All, Male, Female) with a unique key
 # Ensure the 'Obese' and 'Overweight' columns are correctly calculated based on BMI
+# Calculate new feature: Overweight and Obese based on BMI
 df['Overweight'] = df['BMI'].apply(lambda x: 1 if x > 25 else 0)
-df['Obese'] = df['BMI'].apply(lambda x: 1 if x > 30 else 0)  # Create 'Obese' column
+df['Obese'] = df['BMI'].apply(lambda x: 1 if x > 30 else 0)
 
 # Add gender filter (All, Male, Female) with a unique key
 gender = st.selectbox("Select Gender", options=["All", "Male", "Female"], key="gender_select")
@@ -112,7 +113,7 @@ if prior_health_issues:
 if smoker:
     df = df[df['Smoker'] == 1]
 if is_obese:
-    df = df[df['Obese'] == 1]  # Filter by Obese column
+    df = df[df['Obese'] == 1]
 
 # Filter by diagnosis length (convert to years)
 df['Diagnosis_Length_Years'] = df['Diagnosis_Length_months'] // 12
@@ -147,6 +148,40 @@ if not all_pre_mobility:
     )
     df = df[(df['Pre_Mobility'] >= pre_mobility[0]) & (df['Pre_Mobility'] <= pre_mobility[1])]
 
+# Calculate the improvement percentage for the Trial Drug group
+trial_drug_df = df[df['Placebo'] == 0]  # 0 represents Trial Drug
+total_trial_patients = trial_drug_df.shape[0]  # Number of patients in the Trial Drug group
+improved_patients = trial_drug_df[trial_drug_df['Improvement'] == 1].shape[0]  # Number of improved patients
+
+# Calculate the improvement percentage
+if total_trial_patients > 0:
+    improvement_percentage = (improved_patients / total_trial_patients) * 100
+else:
+    improvement_percentage = 0
+
+# Create a list of selected filters for display
+selected_filters = []
+if gender != "All":
+    selected_filters.append(f"Gender: {gender}")
+if family_history:
+    selected_filters.append("Family History: Yes")
+if prior_health_issues:
+    selected_filters.append("Prior Serious Health Issues: Yes")
+if smoker:
+    selected_filters.append("Smoker: Yes")
+if is_obese:
+    selected_filters.append("Obese: Yes")
+
+# Generate the dynamic print statement
+filter_str = ", ".join(selected_filters) if selected_filters else "None"
+result_statement = (
+    f"The trial drug had a {improvement_percentage:.1f}% effect on mobility for {total_trial_patients} "
+    f"patients selected by the filter(s): {filter_str}."
+)
+
+# Display the dynamic print statement in the Streamlit app
+st.write(result_statement)
+
 # Group data by Placebo and Improvement for the first chart
 grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
 
@@ -175,17 +210,8 @@ fig1 = px.bar(grouped_data,
              labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
              title='Patient Improvement Based on Clinical Trial Groups and Health Factors')
 
-# Chart 2: Line chart showing average BMI by Placebo group
-avg_bmi = df.groupby('Placebo')['BMI'].mean().reset_index()
-fig2 = px.line(avg_bmi, 
-               x='Placebo', 
-               y='BMI', 
-               title='Average BMI by Trial Group',
-               labels={'BMI': 'Average BMI', 'Placebo': 'Trial Group'})
-
-# Display both charts
+# Display the chart in the Streamlit app
 st.plotly_chart(fig1)
-st.plotly_chart(fig2)
 ##################################################################
 
 
