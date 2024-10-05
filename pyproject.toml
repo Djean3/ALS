@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "als"  # Changed the name from "data-pipeline" to "als"
+version = "0.1.0"
+description = ""
+authors = ["DJ <davidejeaniii@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "~3.11"
+aws-lambda-powertools = "2.30.2"
+awswrangler = "3.4.2"
+great-expectations = "0.18.7"
+py-cpuinfo = "^9.0.0"
+
+[tool.poetry.group.dev.dependencies]
+black = {extras = ["jupyter"], version = "^23.12.1"}
+flake8 = "6.1.0"
+isort = "5.13.2"
+jupyter = "*"
+notebook = "*"
+pytest = "7.4.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
