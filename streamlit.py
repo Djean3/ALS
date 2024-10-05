@@ -55,19 +55,19 @@ fig_avg = px.line(avg_scores, x='Month', y='Mobility_Score', color='Placebo',
 st.plotly_chart(fig_avg)
 
 
-# Dropdown to select patients
-selected_patient = st.selectbox("Select a Patient to View Individual Mobility Scores", df['Patient_ID'].unique())
+# # Dropdown to select patients
+# selected_patient = st.selectbox("Select a Patient to View Individual Mobility Scores", df['Patient_ID'].unique())
 
-# Filter data for the selected patient
-patient_data = df_melted[df_melted['Patient_ID'] == selected_patient]
+# # Filter data for the selected patient
+# patient_data = df_melted[df_melted['Patient_ID'] == selected_patient]
 
-# Plot individual patient's mobility scores
-fig_patient = px.line(patient_data, x='Month', y='Mobility_Score', 
-                      labels={'Mobility_Score': 'Mobility Score'},
-                      title=f'Mobility Scores for Patient {selected_patient}')
+# # Plot individual patient's mobility scores
+# fig_patient = px.line(patient_data, x='Month', y='Mobility_Score', 
+#                       labels={'Mobility_Score': 'Mobility Score'},
+#                       title=f'Mobility Scores for Patient {selected_patient}')
 
-# Display the patient's individual mobility scores plot
-st.plotly_chart(fig_patient)
+# # Display the patient's individual mobility scores plot
+# st.plotly_chart(fig_patient)
 
 #############################################################################
 ######## IMPROVEMENT DONUT CHART ##################################
