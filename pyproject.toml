@@ -22,6 +22,6 @@ notebook = "*"
 pytest = "7.4.3"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core", "setuptools>=58.0.0"]
 build-backend = "poetry.core.masonry.api"
 
