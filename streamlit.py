@@ -156,14 +156,14 @@ month_columns = ['January_mobility', 'February_mobility', 'March_mobility', 'Apr
                  'November_mobility', 'December_mobility']
 
 # Reshape the data for easier plotting
-data_melted = pd.melt(data, id_vars=['Patient_ID', 'Placebo'], value_vars=month_columns, 
+df_melted = pd.melt(df, id_vars=['Patient_ID', 'Placebo'], value_vars=month_columns, 
                       var_name='Month', value_name='Mobility_Score')
 
 # Convert 'Month' to a categorical type for correct ordering
-data_melted['Month'] = pd.Categorical(data_melted['Month'], categories=month_columns, ordered=True)
+df_melted['Month'] = pd.Categorical(df_melted['Month'], categories=month_columns, ordered=True)
 
 # Calculate the average scores by month for placebo and non-placebo users
-avg_scores = data_melted.groupby(['Placebo', 'Month']).mean().reset_index()
+avg_scores = df_melted.groupby(['Placebo', 'Month']).mean().reset_index()
 
 # Plot the average scores by month for placebo and non-placebo groups
 fig_avg = px.line(avg_scores, x='Month', y='Mobility_Score', color='Placebo',
@@ -173,11 +173,12 @@ fig_avg = px.line(avg_scores, x='Month', y='Mobility_Score', color='Placebo',
 # Display the plot in the Streamlit app
 st.plotly_chart(fig_avg)
 
+
 # Dropdown to select patients
-selected_patient = st.selectbox("Select a Patient to View Individual Mobility Scores", data['Patient_ID'].unique())
+selected_patient = st.selectbox("Select a Patient to View Individual Mobility Scores", df['Patient_ID'].unique())
 
 # Filter data for the selected patient
-patient_data = data_melted[data_melted['Patient_ID'] == selected_patient]
+patient_data = df_melted[df_melted['Patient_ID'] == selected_patient]
 
 # Plot individual patient's mobility scores
 fig_patient = px.line(patient_data, x='Month', y='Mobility_Score', 
@@ -186,9 +187,6 @@ fig_patient = px.line(patient_data, x='Month', y='Mobility_Score',
 
 # Display the patient's individual mobility scores plot
 st.plotly_chart(fig_patient)
-
-
-
 
 
 
