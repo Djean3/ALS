@@ -118,9 +118,9 @@ st.plotly_chart(fig)
 
 #####################################################################
 
-
-# Calculate new feature: Overweight based on BMI (>25 is considered overweight)
+# Calculate new feature: Overweight and Obese based on BMI
 df['Overweight'] = df['BMI'].apply(lambda x: 1 if x > 25 else 0)
+df['Obese'] = df['BMI'].apply(lambda x: 1 if x > 30 else 0)
 
 # Add gender filter (All, Male, Female) with a unique key
 gender = st.selectbox("Select Gender", options=["All", "Male", "Female"], key="gender_select")
@@ -135,6 +135,7 @@ elif gender == "Female":
 family_history = st.checkbox("Has Family History", value=True, key="family_history")
 prior_health_issues = st.checkbox("Had Prior Serious Health Issues", value=True, key="prior_health_issues")
 smoker = st.checkbox("Is Smoker", value=True, key="smoker")
+is_obese = st.checkbox("Is Obese (BMI > 30)", value=True, key="is_obese")
 
 # Filter based on checkboxes
 if family_history:
@@ -143,6 +144,8 @@ if prior_health_issues:
     df = df[df['Prior_Serious_Health_Issues'] == 1]
 if smoker:
     df = df[df['Smoker'] == 1]
+if is_obese:
+    df = df[df['Obese'] == 1]
 
 # Filter by diagnosis length (convert to years)
 df['Diagnosis_Length_Years'] = df['Diagnosis_Length_months'] // 12
@@ -152,6 +155,12 @@ diagnosis_years = st.slider("Select Diagnosis Length (Years)", 0, 10, (0, 10), k
 
 # Filter based on diagnosis length
 df = df[(df['Diagnosis_Length_Years'] >= diagnosis_years[0]) & (df['Diagnosis_Length_Years'] <= diagnosis_years[1])]
+
+# Create a slider for Pre_Mobility score (Before the trial)
+pre_mobility = st.slider("Select Pre Mobility Score (Before Trial)", int(df['Pre_Mobility'].min()), int(df['Pre_Mobility'].max()), (int(df['Pre_Mobility'].min()), int(df['Pre_Mobility'].max())), key="pre_mobility_slider")
+
+# Filter based on Pre Mobility score
+df = df[(df['Pre_Mobility'] >= pre_mobility[0]) & (df['Pre_Mobility'] <= pre_mobility[1])]
 
 # Group data by Placebo and Improvement
 grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
@@ -185,7 +194,6 @@ fig.update_traces(textposition='inside', textfont_size=12)
 
 # Display the bar chart in the Streamlit app
 st.plotly_chart(fig)
-
 
 ##################################################################
 
