@@ -84,17 +84,18 @@ df['Obese'] = df['BMI'].apply(lambda x: 1 if x > 30 else 0)
 # Add gender filter (All, Male, Female) with a unique key
 gender = st.selectbox("Select Gender", options=["All", "Male", "Female"], key="gender_select")
 
-# Filter based on gender
-if gender == "Male":
-    df = df[df['Sex'] == 1]  # 1 represents Male in the dataset
-elif gender == "Female":
-    df = df[df['Sex'] == 0]  # 0 represents Female in the dataset
+# Use columns to arrange checkboxes horizontally
+col1, col2 = st.columns(2)
 
-# Add checkboxes for filtering with unique keys
-family_history = st.checkbox("Has Family History", value=True, key="family_history")
-prior_health_issues = st.checkbox("Had Prior Serious Health Issues", value=True, key="prior_health_issues")
-smoker = st.checkbox("Is Smoker", value=True, key="smoker")
-is_obese = st.checkbox("Is Obese (BMI > 30)", value=True, key="is_obese")
+with col1:
+    # Checkbox in the first column
+    family_history = st.checkbox("Has Family History", value=True, key="family_history")
+    is_obese = st.checkbox("Is Obese (BMI > 30)", value=True, key="is_obese")
+
+with col2:
+    # Checkboxes in the second column
+    prior_health_issues = st.checkbox("Had Prior Serious Health Issues", value=True, key="prior_health_issues")
+    smoker = st.checkbox("Is Smoker", value=True, key="smoker")
 
 # Filter based on checkboxes
 if family_history:
@@ -171,7 +172,6 @@ fig.update_traces(textposition='inside', textfont_size=12)
 
 # Display the bar chart in the Streamlit app
 st.plotly_chart(fig)
-
 ##################################################################
 
 
