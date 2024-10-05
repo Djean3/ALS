@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 # Markdown header with title and short description
 header = """
 # ALS Clinical Trials Dashboard
@@ -146,7 +147,64 @@ for line in lines:
 
 # Create the DataFrame
 df = pd.DataFrame(data, columns=columns)
+##################################DASHBOARD##################################
 
+###### Line chart showing the average mobility score over the course of the trial #####
+# Prepare the data for the line graph
+month_columns = ['January_mobility', 'February_mobility', 'March_mobility', 'April_mobility', 'May_mobility', 
+                 'June_mobility', 'July_mobility', 'August_mobility', 'September_mobility', 'October_mobility', 
+                 'November_mobility', 'December_mobility']
+
+# Reshape the data for easier plotting
+data_melted = pd.melt(data, id_vars=['Patient_ID', 'Placebo'], value_vars=month_columns, 
+                      var_name='Month', value_name='Mobility_Score')
+
+# Convert 'Month' to a categorical type for correct ordering
+data_melted['Month'] = pd.Categorical(data_melted['Month'], categories=month_columns, ordered=True)
+
+# Calculate the average scores by month for placebo and non-placebo users
+avg_scores = data_melted.groupby(['Placebo', 'Month']).mean().reset_index()
+
+# Plot the average scores by month for placebo and non-placebo groups
+fig_avg = px.line(avg_scores, x='Month', y='Mobility_Score', color='Placebo',
+                  labels={'Placebo': 'Placebo Group', 'Mobility_Score': 'Average Mobility Score'},
+                  title='Average Mobility Scores by Month for Placebo and Non-Placebo Groups')
+
+# Display the plot in the Streamlit app
+st.plotly_chart(fig_avg)
+
+# Dropdown to select patients
+selected_patient = st.selectbox("Select a Patient to View Individual Mobility Scores", data['Patient_ID'].unique())
+
+# Filter data for the selected patient
+patient_data = data_melted[data_melted['Patient_ID'] == selected_patient]
+
+# Plot individual patient's mobility scores
+fig_patient = px.line(patient_data, x='Month', y='Mobility_Score', 
+                      labels={'Mobility_Score': 'Mobility Score'},
+                      title=f'Mobility Scores for Patient {selected_patient}')
+
+# Display the patient's individual mobility scores plot
+st.plotly_chart(fig_patient)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##############################################################################
 # Display the DataFrame in the Streamlit app
 st.write("ALS Trial Data")
 st.dataframe(df)
