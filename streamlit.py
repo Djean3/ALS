@@ -81,6 +81,7 @@ st.plotly_chart(fig_avg)
 # Add gender filter (All, Male, Female) with a unique key
 # Ensure the 'Obese' and 'Overweight' columns are correctly calculated based on BMI
 # Calculate new feature: Overweight and Obese based on BMI
+# Calculate new feature: Overweight and Obese based on BMI
 df['Overweight'] = df['BMI'].apply(lambda x: 1 if x > 25 else 0)
 df['Obese'] = df['BMI'].apply(lambda x: 1 if x > 30 else 0)
 
@@ -148,39 +149,60 @@ if not all_pre_mobility:
     )
     df = df[(df['Pre_Mobility'] >= pre_mobility[0]) & (df['Pre_Mobility'] <= pre_mobility[1])]
 
-# Calculate the improvement percentage for the Trial Drug group
-trial_drug_df = df[df['Placebo'] == 0]  # 0 represents Trial Drug
-total_trial_patients = trial_drug_df.shape[0]  # Number of patients in the Trial Drug group
-improved_patients = trial_drug_df[trial_drug_df['Improvement'] == 1].shape[0]  # Number of improved patients
+# Function to generate dynamic statement
+def generate_dynamic_statement(df, placebo_group, group_name):
+    # Filter the group data (0: Trial Drug, 1: Placebo)
+    group_df = df[df['Placebo'] == placebo_group]
+    total_patients = group_df.shape[0]
+    improved_patients = group_df[group_df['Improvement'] == 1].shape[0]
 
-# Calculate the improvement percentage
-if total_trial_patients > 0:
-    improvement_percentage = (improved_patients / total_trial_patients) * 100
-else:
-    improvement_percentage = 0
+    # Calculate improvement percentage
+    if total_patients > 0:
+        improvement_percentage = (improved_patients / total_patients) * 100
+    else:
+        improvement_percentage = 0
 
-# Create a list of selected filters for display
-selected_filters = []
-if gender != "All":
-    selected_filters.append(f"Gender: {gender}")
-if family_history:
-    selected_filters.append("Family History: Yes")
-if prior_health_issues:
-    selected_filters.append("Prior Serious Health Issues: Yes")
-if smoker:
-    selected_filters.append("Smoker: Yes")
-if is_obese:
-    selected_filters.append("Obese: Yes")
+    # Determine the effect (positive, neutral, or negative)
+    if improvement_percentage > 50:
+        effect = "positive"
+    elif improvement_percentage == 50:
+        effect = "neutral"
+    else:
+        effect = "negative"
 
-# Generate the dynamic print statement
-filter_str = ", ".join(selected_filters) if selected_filters else "None"
-result_statement = (
-    f"The trial drug had a {improvement_percentage:.1f}% effect on mobility for {total_trial_patients} "
-    f"patients selected by the filter(s): {filter_str}."
-)
+    # Create a list of selected filters for display
+    selected_filters = []
+    if gender != "All":
+        selected_filters.append(f"{gender.lower()}")
+    if family_history:
+        selected_filters.append("with a family history")
+    if prior_health_issues:
+        selected_filters.append("with prior serious health issues")
+    if smoker:
+        selected_filters.append("who are smokers")
+    if is_obese:
+        selected_filters.append("who are obese")
 
-# Display the dynamic print statement in the Streamlit app
-st.write(result_statement)
+    # Join the filters into a coherent sentence
+    filter_str = " and ".join([", ".join(selected_filters[:-1]), selected_filters[-1]]) if len(selected_filters) > 1 else selected_filters[0] if selected_filters else "all patients"
+
+    # Generate the result statement
+    return (
+        f"The {group_name} had a {effect} effect on mobility, with {improvement_percentage:.1f}% improvement for {total_patients} patients {filter_str}."
+    )
+
+# Generate the statement for the trial drug group
+trial_drug_statement = generate_dynamic_statement(df, placebo_group=0, group_name="trial drug")
+# Display the trial drug statement
+st.write(trial_drug_statement)
+
+# Add a space before the placebo statement
+st.write("")
+
+# Generate the statement for the placebo group
+placebo_statement = generate_dynamic_statement(df, placebo_group=1, group_name="placebo")
+# Display the placebo statement
+st.write(placebo_statement)
 
 # Group data by Placebo and Improvement for the first chart
 grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
