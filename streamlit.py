@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 # Markdown header with title and short description
 header = """
 # ALS Clinical Trials Dashboard
@@ -188,6 +189,58 @@ fig_patient = px.line(patient_data, x='Month', y='Mobility_Score',
 # Display the patient's individual mobility scores plot
 st.plotly_chart(fig_patient)
 
+#############################################################################
+######## IMPROVEMENT DONUT CHART ##################################
+
+# Mapping Placebo values to "Trial Drug" and "Placebo"
+df['Placebo'] = df['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
+
+# Grouping data to get counts for Placebo and Improvement
+grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
+
+# Prepare data for each group
+placebo_data = grouped_data[grouped_data['Placebo'] == 'Placebo']
+trial_drug_data = grouped_data[grouped_data['Placebo'] == 'Trial Drug']
+
+# Data for inner circle (Placebo vs Trial Drug)
+placebo_vs_trial = df['Placebo'].value_counts()
+
+# Define colors for the chart
+colors = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA']
+
+# Create the donut chart
+fig = go.Figure()
+
+# Inner donut (Placebo vs Trial Drug)
+fig.add_trace(go.Pie(
+    labels=placebo_vs_trial.index,
+    values=placebo_vs_trial.values,
+    hole=0.5,
+    textinfo='label+percent',
+    marker=dict(colors=[colors[0], colors[1]]),
+    name='Trial Group',
+    showlegend=True
+))
+
+# Outer donut (Improvement within each group)
+fig.add_trace(go.Pie(
+    labels=grouped_data.apply(lambda row: f"{row['Placebo']} - {'Improved' if row['Improvement'] == 1 else 'Not Improved'}", axis=1),
+    values=grouped_data['Count'],
+    hole=0.7,
+    textinfo='label+percent',
+    marker=dict(colors=[colors[0], colors[0], colors[1], colors[1]]),
+    name='Improvement',
+    showlegend=False
+))
+
+# Update the layout for better presentation
+fig.update_layout(
+    title_text='Improvement Across Placebo and Trial Groups',
+    annotations=[dict(text='Trial Groups', x=0.5, y=0.5, font_size=20, showarrow=False)],
+)
+
+# Display the chart in the Streamlit app
+st.plotly_chart(fig)
 
 
 
@@ -202,7 +255,28 @@ st.plotly_chart(fig_patient)
 
 
 
-##############################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#######################################################################
 # Display the DataFrame in the Streamlit app
 st.write("ALS Trial Data")
 st.dataframe(df)
