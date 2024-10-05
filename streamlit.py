@@ -160,14 +160,15 @@ df_melted = pd.melt(df, id_vars=['Patient_ID', 'Placebo'], value_vars=month_colu
                       var_name='Month', value_name='Mobility_Score')
 
 # Convert 'Month' to a categorical type for correct ordering
-df_melted['Month'] = pd.Categorical(df_melted['Month'], categories=month_columns, ordered=True)
+df_melted['Placebo'] = df_melted['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
 
 # Calculate the average scores by month for placebo and non-placebo users
 avg_scores = df_melted.groupby(['Placebo', 'Month'])['Mobility_Score'].mean().reset_index()
-# Plot the average scores by month for placebo and non-placebo groups
+
+# Plot the average scores by month for placebo and non-placebo groups with updated labels
 fig_avg = px.line(avg_scores, x='Month', y='Mobility_Score', color='Placebo',
-                  labels={'Placebo': 'Placebo Group', 'Mobility_Score': 'Average Mobility Score'},
-                  title='Average Mobility Scores by Month for Placebo and Non-Placebo Groups')
+                  labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Average Mobility Score'},
+                  title='Average Mobility Scores by Month for Trial Drug and Placebo Groups')
 
 # Display the plot in the Streamlit app
 st.plotly_chart(fig_avg)
