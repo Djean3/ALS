@@ -1,6 +1,17 @@
 import streamlit as st
 import pandas as pd
+# Markdown header with title and short description
+header = """
+# ALS Clinical Trials Dashboard
 
+This dashboard displays the results of a clinical trial studying the effects of a new treatment on ALS patients. 
+We are monitoring mobility improvements over the course of the trial, taking into account factors such as 
+family history, prior health issues, and placebo group status. 
+
+Scroll down to view detailed patient data and overall trial results.
+
+[Go to Data Dictionary](#data-dictionary)
+"""
 # Column names
 columns = [
     'Patient_ID', 'Placebo', 'Family_History', 'Prior_Serious_Health_Issues', 'Sex', 'Height_in_inches',
