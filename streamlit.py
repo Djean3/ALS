@@ -109,32 +109,34 @@ if is_obese:
 # Filter by diagnosis length (convert to years)
 df['Diagnosis_Length_Years'] = df['Diagnosis_Length_months'] // 12
 
-# Diagnosis length slider with "All" logic
+# Diagnosis Length Checkbox and Slider
+all_diagnosis_years = st.checkbox("All Diagnosis Lengths", value=True, key="all_diagnosis_years")
+
 min_years = int(df['Diagnosis_Length_Years'].min())
 max_years = int(df['Diagnosis_Length_Years'].max())
 
-diagnosis_years = st.slider(
-    "Select Diagnosis Length (Years)", 
-    min_years, max_years, (min_years, max_years), 
-    key="diagnosis_years_slider"
-)
-
-# Handle "All" logic for diagnosis length
-if diagnosis_years != (min_years, max_years):
+# Disable slider if "All Diagnosis Lengths" is checked
+if not all_diagnosis_years:
+    diagnosis_years = st.slider(
+        "Select Diagnosis Length (Years)", 
+        min_years, max_years, (min_years, max_years), 
+        key="diagnosis_years_slider"
+    )
     df = df[(df['Diagnosis_Length_Years'] >= diagnosis_years[0]) & (df['Diagnosis_Length_Years'] <= diagnosis_years[1])]
 
-# Pre Mobility slider with "All" logic
+# Pre Mobility Checkbox and Slider
+all_pre_mobility = st.checkbox("All Pre Mobility Scores", value=True, key="all_pre_mobility")
+
 min_mobility = int(df['Pre_Mobility'].min())
 max_mobility = int(df['Pre_Mobility'].max())
 
-pre_mobility = st.slider(
-    "Select Pre Mobility Score (Before Trial)", 
-    min_mobility, max_mobility, (min_mobility, max_mobility), 
-    key="pre_mobility_slider"
-)
-
-# Handle "All" logic for Pre Mobility
-if pre_mobility != (min_mobility, max_mobility):
+# Disable slider if "All Pre Mobility Scores" is checked
+if not all_pre_mobility:
+    pre_mobility = st.slider(
+        "Select Pre Mobility Score (Before Trial)", 
+        min_mobility, max_mobility, (min_mobility, max_mobility), 
+        key="pre_mobility_slider"
+    )
     df = df[(df['Pre_Mobility'] >= pre_mobility[0]) & (df['Pre_Mobility'] <= pre_mobility[1])]
 
 # Group data by Placebo and Improvement
