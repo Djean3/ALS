@@ -177,8 +177,11 @@ def generate_dynamic_statement(df, placebo_group, group_name):
     if is_obese:
         selected_filters.append("who are obese")
 
-    # Join the filters into a coherent sentence
-    filter_str = " and ".join([", ".join(selected_filters[:-1]), selected_filters[-1]]) if len(selected_filters) > 1 else selected_filters[0] if selected_filters else "all patients"
+    # Correctly form the filter string
+    if selected_filters:
+        filter_str = " and ".join([", ".join(selected_filters[:-1]), selected_filters[-1]]) if len(selected_filters) > 1 else selected_filters[0]
+    else:
+        filter_str = "all patients"
 
     # Generate the result statement based on the effect
     if improvement_percentage > 50:
@@ -191,10 +194,14 @@ def generate_dynamic_statement(df, placebo_group, group_name):
             f"who also {filter_str}."
         )
 
-# Generate the statement for the trial drug group
+# Example of generating statements for trial drug and placebo groups:
 trial_drug_statement = generate_dynamic_statement(df, placebo_group=0, group_name="trial drug")
-# Display the trial drug statement
+placebo_statement = generate_dynamic_statement(df, placebo_group=1, group_name="placebo")
+
+# Display the statements in the app
 st.write(trial_drug_statement)
+st.write("")
+st.write(placebo_statement)
 
 # Add a space before the placebo statement
 st.write("")
