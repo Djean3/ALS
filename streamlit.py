@@ -78,11 +78,7 @@ st.plotly_chart(fig_avg)
 #####################################################################
 
 # Calculate new feature: Overweight and Obese based on BMI
-# Add gender filter (All, Male, Female) with a unique key
-# Ensure the 'Obese' and 'Overweight' columns are correctly calculated based on BMI
-# Calculate new feature: Overweight and Obese based on BMI
-# Calculate new feature: Overweight and Obese based on BMI
-# Calculate new feature: Overweight and Obese based on BMI
+
 df['Overweight'] = df['BMI'].apply(lambda x: 1 if x > 25 else 0)
 df['Obese'] = df['BMI'].apply(lambda x: 1 if x > 30 else 0)
 
@@ -171,7 +167,9 @@ def generate_dynamic_statement(df, placebo_group, group_name):
 
     # Create a list of selected filters for display
     selected_filters = []
-    if not all_patients:  # Only show filters if "All Patients" is unchecked
+    
+    # Only show filters if "All Patients" is unchecked
+    if not all_patients:
         if gender != "All":
             selected_filters.append(f"{gender.lower()}")
         if family_history:
@@ -182,6 +180,10 @@ def generate_dynamic_statement(df, placebo_group, group_name):
             selected_filters.append("who are smokers")
         if is_obese:
             selected_filters.append("who are obese")
+        if not all_diagnosis_years:
+            selected_filters.append(f"who have been diagnosed for {diagnosis_years[0]}-{diagnosis_years[1]} years")
+        if not all_pre_mobility:
+            selected_filters.append(f"with a premobility score range of {pre_mobility[0]}-{pre_mobility[1]}")
 
     # Correctly form the filter string
     if selected_filters:
@@ -191,13 +193,13 @@ def generate_dynamic_statement(df, placebo_group, group_name):
 
     # Generate the result statement based on the effect
     if improvement_percentage > 50:
-        return f"The {group_name} had a positive effect on mobility, with {improvement_percentage:.1f}% improvement for {total_patients} patients {filter_str}."
+        return f"The {group_name} had a positive effect on mobility, with {improvement_percentage:.1f}% improvement for {total_patients} patients who were {filter_str}."
     elif improvement_percentage == 50:
-        return f"The {group_name} had a neutral effect on mobility, with 50% of {total_patients} patients {filter_str} showing improvement."
+        return f"The {group_name} had a neutral effect on mobility, with 50% of {total_patients} patients who were {filter_str} showing improvement."
     else:
         return (
             f"The {group_name} was ineffective on the selected patients, with only {improvement_percentage:.1f}% ({improved_patients} of {total_patients} patients) experiencing mobility improvement "
-            f"who also {filter_str}."
+            f"who were {filter_str}."
         )
 
 # Generate the statement for the trial drug group
