@@ -79,6 +79,11 @@ st.plotly_chart(fig_avg)
 
 # Calculate new feature: Overweight and Obese based on BMI
 # Add gender filter (All, Male, Female) with a unique key
+# Ensure the 'Obese' and 'Overweight' columns are correctly calculated based on BMI
+df['Overweight'] = df['BMI'].apply(lambda x: 1 if x > 25 else 0)
+df['Obese'] = df['BMI'].apply(lambda x: 1 if x > 30 else 0)  # Create 'Obese' column
+
+# Add gender filter (All, Male, Female) with a unique key
 gender = st.selectbox("Select Gender", options=["All", "Male", "Female"], key="gender_select")
 
 # Use columns to arrange checkboxes horizontally
@@ -107,7 +112,7 @@ if prior_health_issues:
 if smoker:
     df = df[df['Smoker'] == 1]
 if is_obese:
-    df = df[df['Obese'] == 1]
+    df = df[df['Obese'] == 1]  # Filter by Obese column
 
 # Filter by diagnosis length (convert to years)
 df['Diagnosis_Length_Years'] = df['Diagnosis_Length_months'] // 12
