@@ -163,8 +163,7 @@ df_melted = pd.melt(df, id_vars=['Patient_ID', 'Placebo'], value_vars=month_colu
 df_melted['Month'] = pd.Categorical(df_melted['Month'], categories=month_columns, ordered=True)
 
 # Calculate the average scores by month for placebo and non-placebo users
-avg_scores = df_melted.groupby(['Placebo', 'Month']).mean().reset_index()
-
+avg_scores = df_melted.groupby(['Placebo', 'Month'])['Mobility_Score'].mean().reset_index()
 # Plot the average scores by month for placebo and non-placebo groups
 fig_avg = px.line(avg_scores, x='Month', y='Mobility_Score', color='Placebo',
                   labels={'Placebo': 'Placebo Group', 'Mobility_Score': 'Average Mobility Score'},
