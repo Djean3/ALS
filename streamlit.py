@@ -109,14 +109,18 @@ if is_obese:
 # Filter by diagnosis length (convert to years)
 df['Diagnosis_Length_Years'] = df['Diagnosis_Length_months'] // 12
 
-# Create a slider for diagnosis length (years) with a unique key
-diagnosis_years = st.slider("Select Diagnosis Length (Years)", 0, 10, (0, 10), key="diagnosis_years_slider")
+# Create a slider for diagnosis length (years) with a default value that covers the full range
+min_years = int(df['Diagnosis_Length_Years'].min())
+max_years = int(df['Diagnosis_Length_Years'].max())
+diagnosis_years = st.slider("Select Diagnosis Length (Years)", min_years, max_years, (min_years, max_years), key="diagnosis_years_slider")
 
 # Filter based on diagnosis length
 df = df[(df['Diagnosis_Length_Years'] >= diagnosis_years[0]) & (df['Diagnosis_Length_Years'] <= diagnosis_years[1])]
 
-# Create a slider for Pre_Mobility score (Before the trial)
-pre_mobility = st.slider("Select Pre Mobility Score (Before Trial)", int(df['Pre_Mobility'].min()), int(df['Pre_Mobility'].max()), (int(df['Pre_Mobility'].min()), int(df['Pre_Mobility'].max())), key="pre_mobility_slider")
+# Create a slider for Pre_Mobility score (Before the trial) with a default value that covers the full range
+min_mobility = int(df['Pre_Mobility'].min())
+max_mobility = int(df['Pre_Mobility'].max())
+pre_mobility = st.slider("Select Pre Mobility Score (Before Trial)", min_mobility, max_mobility, (min_mobility, max_mobility), key="pre_mobility_slider")
 
 # Filter based on Pre Mobility score
 df = df[(df['Pre_Mobility'] >= pre_mobility[0]) & (df['Pre_Mobility'] <= pre_mobility[1])]
