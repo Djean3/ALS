@@ -219,18 +219,20 @@ fig.add_trace(go.Pie(
     textinfo='label+percent',
     marker=dict(colors=[colors[0], colors[1]]),
     name='Trial Group',
+    pull=[0.05, 0.05],  # Add separation between inner slices
     showlegend=True
 ))
 
 # Outer donut (Improvement within each group)
 fig.add_trace(go.Pie(
-    labels=grouped_data.apply(lambda row: f"{row['Placebo']} - {'Improved' if row['Improvement'] == 1 else 'Not Improved'}", axis=1),
+    labels=grouped_data.apply(lambda row: 'Improved' if row['Improvement'] == 1 else 'Not Improved', axis=1),
     values=grouped_data['Count'],
     hole=0.7,
     textinfo='label+percent',
     marker=dict(colors=[colors[0], colors[0], colors[1], colors[1]]),
     name='Improvement',
-    showlegend=False
+    pull=[0.05, 0.05, 0.05, 0.05],  # Add separation between outer slices
+    showlegend=True
 ))
 
 # Update the layout for better presentation
