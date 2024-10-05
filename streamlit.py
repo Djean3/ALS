@@ -13,6 +13,8 @@ Scroll down to view detailed patient data and overall trial results.
 [Go to Data Dictionary](#data-dictionary)
 """
 # Column names
+# Display the header in the app
+st.markdown(header)
 columns = [
     'Patient_ID', 'Placebo', 'Family_History', 'Prior_Serious_Health_Issues', 'Sex', 'Height_in_inches',
     'Weight_in_pounds', 'Smoker', 'Diagnosis_Length_months', 'Pre_Mobility', 'BMI', 'January_mobility',
