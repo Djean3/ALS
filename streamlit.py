@@ -165,7 +165,7 @@ fig = px.bar(grouped_data,
              barmode='stack',  # Stacked bar chart
              text=grouped_data['text'],  # Display percentage and patient count
              labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
-             title=f'Improvement Across Placebo and Trial Groups ({gender})')
+             title='Patient Improvement Based on Clinical Trial Groups and Health Factors')
 
 # Update the layout to display text on the bars
 fig.update_traces(textposition='inside', textfont_size=12)
