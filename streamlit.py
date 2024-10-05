@@ -71,14 +71,13 @@ st.plotly_chart(fig_patient)
 
 #############################################################################
 ######## IMPROVEMENT DONUT CHART ##################################
-
-df['Placebo'] = df['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
-
-# Group data by Placebo and Improvement
 grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
 
 # Map Improvement values for better labeling
 grouped_data['Improvement'] = grouped_data['Improvement'].map({0: 'Not Improved', 1: 'Improved'})
+
+# Map Placebo values for better labeling (0: Trial Drug, 1: Placebo)
+grouped_data['Placebo'] = grouped_data['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
 
 # Create the grouped bar chart
 fig = px.bar(grouped_data, 
