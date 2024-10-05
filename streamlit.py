@@ -78,9 +78,6 @@ st.plotly_chart(fig_avg)
 #####################################################################
 
 # Calculate new feature: Overweight and Obese based on BMI
-df['Overweight'] = df['BMI'].apply(lambda x: 1 if x > 25 else 0)
-df['Obese'] = df['BMI'].apply(lambda x: 1 if x > 30 else 0)
-
 # Add gender filter (All, Male, Female) with a unique key
 gender = st.selectbox("Select Gender", options=["All", "Male", "Female"], key="gender_select")
 
@@ -97,7 +94,12 @@ with col2:
     prior_health_issues = st.checkbox("Had Prior Serious Health Issues", value=True, key="prior_health_issues")
     smoker = st.checkbox("Is Smoker", value=True, key="smoker")
 
-# Filter based on checkboxes
+# Apply filters based on checkboxes and dropdowns
+if gender == "Male":
+    df = df[df['Sex'] == 1]  # 1 represents Male
+elif gender == "Female":
+    df = df[df['Sex'] == 0]  # 0 represents Female
+
 if family_history:
     df = df[df['Family_History'] == 1]
 if prior_health_issues:
@@ -140,7 +142,7 @@ if not all_pre_mobility:
     )
     df = df[(df['Pre_Mobility'] >= pre_mobility[0]) & (df['Pre_Mobility'] <= pre_mobility[1])]
 
-# Group data by Placebo and Improvement
+# Group data by Placebo and Improvement for the first chart
 grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
 
 # Calculate the total count for each Placebo group
@@ -158,7 +160,8 @@ grouped_data['Placebo'] = grouped_data['Placebo'].map({0: 'Trial Drug', 1: 'Plac
 # Create the stacked bar chart with percentages and patient count as text on the bars
 grouped_data['text'] = grouped_data.apply(lambda row: f"{row['Percentage']:.1f}% - {row['Count']} patients", axis=1)
 
-fig = px.bar(grouped_data, 
+# Chart 1: Improvement Based on Placebo and Trial Groups
+fig1 = px.bar(grouped_data, 
              x='Placebo', 
              y='Count', 
              color='Improvement', 
@@ -167,11 +170,17 @@ fig = px.bar(grouped_data,
              labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
              title='Patient Improvement Based on Clinical Trial Groups and Health Factors')
 
-# Update the layout to display text on the bars
-fig.update_traces(textposition='inside', textfont_size=12)
+# Chart 2: Line chart showing average BMI by Placebo group
+avg_bmi = df.groupby('Placebo')['BMI'].mean().reset_index()
+fig2 = px.line(avg_bmi, 
+               x='Placebo', 
+               y='BMI', 
+               title='Average BMI by Trial Group',
+               labels={'BMI': 'Average BMI', 'Placebo': 'Trial Group'})
 
-# Display the bar chart in the Streamlit app
-st.plotly_chart(fig)
+# Display both charts
+st.plotly_chart(fig1)
+st.plotly_chart(fig2)
 ##################################################################
 
 
