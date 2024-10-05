@@ -2,8 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # Define the URL of your CSV file in the GitHub repo
-csv_url = "https://raw.githubusercontent.com/Djean3/ALS/main/ALS_trial_data.csv
-"
+csv_url = "https://raw.githubusercontent.com/Djean3/ALS/main/ALS_trial_data.csv"
 
 # Use pandas to load the data
 @st.cache
