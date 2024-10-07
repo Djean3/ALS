@@ -19,7 +19,7 @@ Scroll down to view detailed patient data and overall trial results.
 _This survey has no medical value and was created with synthetic data for demonstration purposes only._
 """
 
-
+st.markdown(header)
 
 
 
@@ -208,6 +208,15 @@ grouped_data['Placebo'] = grouped_data['Placebo'].map({0: 'Trial Drug', 1: 'Plac
 # Create the stacked bar chart with percentages and patient count as text on the bars
 grouped_data['text'] = grouped_data.apply(lambda row: f"{row['Percentage']:.1f}% - {row['Count']} patients", axis=1)
 
+df_melted_filtered = pd.melt(df, id_vars=['Patient_ID', 'Placebo'], value_vars=month_columns, 
+                             var_name='Month', value_name='Mobility_Score')
+
+# Convert 'Placebo' to readable labels
+df_melted_filtered['Placebo'] = df_melted_filtered['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
+
+# Calculate the average scores by month for placebo and non-placebo users based on filtered data
+avg_scores_filtered = df_melted_filtered.groupby(['Placebo', 'Month'])['Mobility_Score'].mean().reset_index()
+
 # Chart 1: Improvement Based on Placebo and Trial Groups (stacked bar chart)
 fig1 = px.bar(grouped_data, 
              x='Placebo', 
@@ -218,10 +227,10 @@ fig1 = px.bar(grouped_data,
              labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
              title='Patient Improvement Based on Clinical Trial Groups and Health Factors')
 
-# Plot the average mobility scores by month (line chart)
-fig_avg = px.line(avg_scores, x='Month', y='Mobility_Score', color='Placebo',
-                  labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Average Mobility Score'},
-                  title='Average Mobility Scores by Month for Trial Drug and Placebo Groups')
+# Plot the dynamically updated average mobility scores by month (line chart)
+fig_avg_filtered = px.line(avg_scores_filtered, x='Month', y='Mobility_Score', color='Placebo',
+                           labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Average Mobility Score'},
+                           title='Average Mobility Scores by Month for Trial Drug and Placebo Groups')
 
 # Containerizing the two charts
 with st.container():
@@ -232,9 +241,9 @@ with st.container():
     with col1:
         st.plotly_chart(fig1, use_container_width=True)  # Make the chart fill the column width
 
-    # Display the line chart in the second column, using full container width
+    # Display the dynamically updated line chart in the second column, using full container width
     with col2:
-        st.plotly_chart(fig_avg, use_container_width=True)  # Make the chart fill the column width
+        st.plotly_chart(fig_avg_filtered, use_container_width=True)  # Make the chart fill the column width
 
 
 
