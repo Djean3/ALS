@@ -348,7 +348,7 @@ max_mobility = int(df['Pre_Mobility'].max())
 
 # Disable slider if "All Pre Mobility Scores" is checked
 if not all_pre_mobility:
-    pre_mobility = pre_mobility = st.slider(
+    pre_mobility = st.slider(
         "Select Pre Mobility Score (Before Trial)", 
         min_mobility, max_mobility, (min_mobility, max_mobility), 
         key="pre_mobility_slider"
