@@ -18,8 +18,9 @@ _This survey has no medical value and was created with synthetic data for demons
 """
 
 
-import plotly.express as px
-import streamlit as st
+
+
+st.set_page_config(layout="wide", page_title="ALS Clinical Trials Dashboard")
 
 # Load the CSV from the URL
 url = "https://raw.githubusercontent.com/Djean3/ALS/main/ALS_trial_data.csv"
@@ -180,15 +181,7 @@ def generate_dynamic_statement(df, placebo_group, group_name):
 # Generate the statement for the trial drug group
 trial_drug_statement = generate_dynamic_statement(df, placebo_group=0, group_name="trial drug")
 # Display the trial drug statement
-st.write(trial_drug_statement)
 
-# Add a space before the placebo statement
-st.write("")
-
-# Generate the statement for the placebo group
-placebo_statement = generate_dynamic_statement(df, placebo_group=1, group_name="placebo")
-# Display the placebo statement
-st.write(placebo_statement)
 
 # Group data by Placebo and Improvement for the first chart
 grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
@@ -225,19 +218,28 @@ fig_avg = px.line(avg_scores, x='Month', y='Mobility_Score', color='Placebo',
 
 # Containerizing the two charts
 with st.container():
-    col1, col2 = st.columns(2)
+    # Adjust column width by specifying different fractions (e.g., 5:5 for equal width)
+    col1, col2 = st.columns([1, 1])  # Equal width for both columns
 
-    # Display the bar chart in the first column
+    # Display the bar chart in the first column, using full container width
     with col1:
-        st.plotly_chart(fig1)  # fig1 is properly defined above
+        st.plotly_chart(fig1, use_container_width=True)  # Make the chart fill the column width
 
-    # Display the line chart in the second column
+    # Display the line chart in the second column, using full container width
     with col2:
-        st.plotly_chart(fig_avg)
+        st.plotly_chart(fig_avg, use_container_width=True)  # Make the chart fill the column width
 
 
 
+st.write(trial_drug_statement)
 
+# Add a space before the placebo statement
+st.write("")
+
+# Generate the statement for the placebo group
+placebo_statement = generate_dynamic_statement(df, placebo_group=1, group_name="placebo")
+# Display the placebo statement
+st.write(placebo_statement)
 
 
 
