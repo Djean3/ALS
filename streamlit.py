@@ -63,18 +63,23 @@ df['Obese'] = df['BMI'].apply(lambda x: 1 if x > 30 else 0)
 # Add "All Patients" checkbox
 all_patients = st.checkbox("All Patients", value=True, key="all_patients")
 
+gender = 'All'  # Default value if not selected otherwise
+
 # Disable other filters if "All Patients" is selected
 if not all_patients:
+    # Add gender filter (All, Male, Female) with a unique key
     gender = st.selectbox("Select Gender", options=["All", "Male", "Female"], key="gender_select")
 
     # Use columns to arrange checkboxes horizontally
     col1, col2 = st.columns(2)
 
     with col1:
+        # Checkbox in the first column
         family_history = st.checkbox("Has Family History", value=False, key="family_history")
         is_obese = st.checkbox("Is Obese (BMI > 30)", value=False, key="is_obese")
 
     with col2:
+        # Checkboxes in the second column
         prior_health_issues = st.checkbox("Had Prior Serious Health Issues", value=False, key="prior_health_issues")
         smoker = st.checkbox("Is Smoker", value=False, key="smoker")
 
@@ -96,10 +101,13 @@ if not all_patients:
 # Filter by diagnosis length (convert to years)
 df['Diagnosis_Length_Years'] = df['Diagnosis_Length_months'] // 12
 
+# Diagnosis Length Checkbox and Slider
 all_diagnosis_years = st.checkbox("All Diagnosis Lengths", value=True, key="all_diagnosis_years")
+
 min_years = int(df['Diagnosis_Length_Years'].min())
 max_years = int(df['Diagnosis_Length_Years'].max())
 
+# Disable slider if "All Diagnosis Lengths" is checked
 if not all_diagnosis_years:
     diagnosis_years = st.slider(
         "Select Diagnosis Length (Years)", 
@@ -110,8 +118,10 @@ if not all_diagnosis_years:
 
 # Pre Mobility Checkbox and Slider
 all_pre_mobility = st.checkbox("All Pre Mobility Scores", value=True, key="all_pre_mobility")
+
 min_mobility = int(df['Pre_Mobility'].min())
 max_mobility = int(df['Pre_Mobility'].max())
+
 
 if not all_pre_mobility:
     pre_mobility = st.slider(
