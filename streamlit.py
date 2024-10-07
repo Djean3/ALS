@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 # Markdown header with title and short description
+
+st.set_page_config(layout="wide", page_title="ALS Clinical Trials Dashboard")
 header = """
 # ALS Clinical Trials Dashboard
 
@@ -20,7 +22,7 @@ _This survey has no medical value and was created with synthetic data for demons
 
 
 
-st.set_page_config(layout="wide", page_title="ALS Clinical Trials Dashboard")
+
 
 # Load the CSV from the URL
 url = "https://raw.githubusercontent.com/Djean3/ALS/main/ALS_trial_data.csv"
@@ -160,22 +162,27 @@ def generate_dynamic_statement(df, placebo_group, group_name):
             selected_filters.append(f"who have been diagnosed for {diagnosis_years[0]}-{diagnosis_years[1]} years")
         if not all_pre_mobility:
             selected_filters.append(f"with a pre-mobility score range of {pre_mobility[0]}-{pre_mobility[1]}")
+    else:
+        selected_filters.append("all patients in the study")
 
     # Correctly form the filter string
     if selected_filters:
         filter_str = " and ".join([", ".join(selected_filters[:-1]), selected_filters[-1]]) if len(selected_filters) > 1 else selected_filters[0]
+        if all_patients:
+            # When "All Patients" is selected, change 'who' to 'for'
+            filter_str = f"for {filter_str}"
     else:
-        filter_str = "all patients"
+        filter_str = "all patients in the study"
 
     # Generate the result statement based on the effect
     if improvement_percentage > 50:
-        return f"The {group_name} had a positive effect on mobility, with {improvement_percentage:.1f}% improvement for {total_patients} patients who were {filter_str}."
+        return f"The {group_name} had a positive effect on mobility, with {improvement_percentage:.1f}% improvement for {total_patients} patients {filter_str}."
     elif improvement_percentage == 50:
-        return f"The {group_name} had a neutral effect on mobility, with 50% of {total_patients} patients who were {filter_str} showing improvement."
+        return f"The {group_name} had a neutral effect on mobility, with 50% of {total_patients} patients {filter_str} showing improvement."
     else:
         return (
             f"The {group_name} was ineffective on the selected patients, with only {improvement_percentage:.1f}% ({improved_patients} of {total_patients} patients) experiencing mobility improvement "
-            f"who were {filter_str}."
+            f"{filter_str}."
         )
 
 # Generate the statement for the trial drug group
