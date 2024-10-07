@@ -57,7 +57,6 @@ df_melted['Placebo'] = df_melted['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
 # Calculate the average scores by month for placebo and non-placebo users
 avg_scores = df_melted.groupby(['Placebo', 'Month'])['Mobility_Score'].mean().reset_index()
 
-# Add overweight and obese filters
 df['Overweight'] = df['BMI'].apply(lambda x: 1 if x > 25 else 0)
 df['Obese'] = df['BMI'].apply(lambda x: 1 if x > 30 else 0)
 
@@ -66,19 +65,16 @@ all_patients = st.checkbox("All Patients", value=True, key="all_patients")
 
 # Disable other filters if "All Patients" is selected
 if not all_patients:
-    # Add gender filter (All, Male, Female) with a unique key
     gender = st.selectbox("Select Gender", options=["All", "Male", "Female"], key="gender_select")
 
     # Use columns to arrange checkboxes horizontally
     col1, col2 = st.columns(2)
 
     with col1:
-        # Checkbox in the first column
         family_history = st.checkbox("Has Family History", value=False, key="family_history")
         is_obese = st.checkbox("Is Obese (BMI > 30)", value=False, key="is_obese")
 
     with col2:
-        # Checkboxes in the second column
         prior_health_issues = st.checkbox("Had Prior Serious Health Issues", value=False, key="prior_health_issues")
         smoker = st.checkbox("Is Smoker", value=False, key="smoker")
 
@@ -100,13 +96,10 @@ if not all_patients:
 # Filter by diagnosis length (convert to years)
 df['Diagnosis_Length_Years'] = df['Diagnosis_Length_months'] // 12
 
-# Diagnosis Length Checkbox and Slider
 all_diagnosis_years = st.checkbox("All Diagnosis Lengths", value=True, key="all_diagnosis_years")
-
 min_years = int(df['Diagnosis_Length_Years'].min())
 max_years = int(df['Diagnosis_Length_Years'].max())
 
-# Disable slider if "All Diagnosis Lengths" is checked
 if not all_diagnosis_years:
     diagnosis_years = st.slider(
         "Select Diagnosis Length (Years)", 
@@ -117,11 +110,9 @@ if not all_diagnosis_years:
 
 # Pre Mobility Checkbox and Slider
 all_pre_mobility = st.checkbox("All Pre Mobility Scores", value=True, key="all_pre_mobility")
-
 min_mobility = int(df['Pre_Mobility'].min())
 max_mobility = int(df['Pre_Mobility'].max())
 
-# Disable slider if "All Pre Mobility Scores" is checked
 if not all_pre_mobility:
     pre_mobility = st.slider(
         "Select Pre Mobility Score (Before Trial)", 
@@ -130,23 +121,21 @@ if not all_pre_mobility:
     )
     df = df[(df['Pre_Mobility'] >= pre_mobility[0]) & (df['Pre_Mobility'] <= pre_mobility[1])]
 
+############################################
+
 # Function to generate dynamic statement with clarity on minimal improvements
 def generate_dynamic_statement(df, placebo_group, group_name):
-    # Filter the group data (0: Trial Drug, 1: Placebo)
     group_df = df[df['Placebo'] == placebo_group]
     total_patients = group_df.shape[0]
     improved_patients = group_df[group_df['Improvement'] == 1].shape[0]
 
-    # Calculate improvement percentage
     if total_patients > 0:
         improvement_percentage = (improved_patients / total_patients) * 100
     else:
         improvement_percentage = 0
 
-    # Create a list of selected filters for display
     selected_filters = []
-    filtered_df = df.copy()
-    # Only show filters if "All Patients" is unchecked
+
     if not all_patients:
         if gender != "All":
             selected_filters.append(f"{gender.lower()} patients")
@@ -165,83 +154,27 @@ def generate_dynamic_statement(df, placebo_group, group_name):
     else:
         selected_filters.append("all patients in the study")
 
-    # Correctly form the filter string
-    if selected_filters:
-        filter_str = " and ".join([", ".join(selected_filters[:-1]), selected_filters[-1]]) if len(selected_filters) > 1 else selected_filters[0]
-        if all_patients:
-            # When "All Patients" is selected, change 'who' to 'for'
-            filter_str = f"for {filter_str}"
-    else:
-        filter_str = "all patients in the study"
+    filter_str = " and ".join([", ".join(selected_filters[:-1]), selected_filters[-1]]) if len(selected_filters) > 1 else selected_filters[0]
 
-    # Generate the result statement based on the effect
     if improvement_percentage > 50:
         return f"The {group_name} had a positive effect on mobility, with {improvement_percentage:.1f}% improvement for {total_patients} patients {filter_str}."
     elif improvement_percentage == 50:
         return f"The {group_name} had a neutral effect on mobility, with 50% of {total_patients} patients {filter_str} showing improvement."
     else:
-        return (
-            f"The {group_name} was ineffective on the selected patients, with only {improvement_percentage:.1f}% ({improved_patients} of {total_patients} patients) experiencing mobility improvement "
-            f"{filter_str}."
-        )
+        return f"The {group_name} was ineffective on the selected patients, with only {improvement_percentage:.1f}% ({improved_patients} of {total_patients} patients) experiencing mobility improvement {filter_str}."
 
-
-
-
-
-
-#############################################################################################
- #Calculate the average pre-mobility and trial average mobility for filtered patients
-avg_pre_mobility = filtered_df['Pre_Mobility'].mean()
-avg_trial_mobility = filtered_df['Trial_Avg_Mobility'].mean()
-###################################
-
-
-
-
-
-# Calculate the percentage change
-if avg_pre_mobility != 0:
-    percent_change = ((avg_trial_mobility - avg_pre_mobility) / avg_pre_mobility) * 100
-else:
-    percent_change = 0
-
-# Create a dataframe to hold this data for visualization
-mobility_data = pd.DataFrame({
-    'Mobility Stage': ['Pre-Trial Mobility', 'Post-Trial Mobility'],
-    'Average Score': [avg_pre_mobility, avg_trial_mobility]
-})
-# Generate the statement for the trial drug group
+# Generate statements
 trial_drug_statement = generate_dynamic_statement(df, placebo_group=0, group_name="trial drug")
-# Display the trial drug statement
+placebo_statement = generate_dynamic_statement(df, placebo_group=1, group_name="placebo")
 
-
+##########################################################################
 # Group data by Placebo and Improvement for the first chart
 grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
-
-# Calculate the total count for each Placebo group
 grouped_data['Total'] = grouped_data.groupby('Placebo')['Count'].transform('sum')
-
-# Calculate the percentage of patients in each group
 grouped_data['Percentage'] = (grouped_data['Count'] / grouped_data['Total']) * 100
-
-# Map Improvement values for better labeling
 grouped_data['Improvement'] = grouped_data['Improvement'].map({0: 'Not Improved', 1: 'Improved'})
-
-# Map Placebo values for better labeling (0: Trial Drug, 1: Placebo)
-grouped_data['Placebo'] = grouped_data['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
-
-# Create the stacked bar chart with percentages and patient count as text on the bars
+grouped_data['Placebo'] = grouped_data['Placebo'].map({0: 'Trial Drug', 1:
 grouped_data['text'] = grouped_data.apply(lambda row: f"{row['Percentage']:.1f}% - {row['Count']} patients", axis=1)
-
-df_melted_filtered = pd.melt(df, id_vars=['Patient_ID', 'Placebo'], value_vars=month_columns, 
-                             var_name='Month', value_name='Mobility_Score')
-
-# Convert 'Placebo' to readable labels
-df_melted_filtered['Placebo'] = df_melted_filtered['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
-
-# Calculate the average scores by month for placebo and non-placebo users based on filtered data
-avg_scores_filtered = df_melted_filtered.groupby(['Placebo', 'Month'])['Mobility_Score'].mean().reset_index()
 
 # Chart 1: Improvement Based on Placebo and Trial Groups (stacked bar chart)
 fig1 = px.bar(grouped_data, 
@@ -253,87 +186,207 @@ fig1 = px.bar(grouped_data,
              labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
              title='Patient Improvement Based on Clinical Trial Groups and Health Factors')
 
-# Plot the dynamically updated average mobility scores by month (line chart)
+# Plot the average mobility scores by month (filtered based on user selections)
+df_melted_filtered = pd.melt(df, id_vars=['Patient_ID', 'Placebo'], value_vars=month_columns, 
+                             var_name='Month', value_name='Mobility_Score')
+
+df_melted_filtered['Placebo'] = df_melted_filtered['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
+avg_scores_filtered = df_melted_filtered.groupby(['Placebo', 'Month'])['Mobility_Score'].mean().reset_index()
+
+# Line chart: Average mobility scores by month for Trial Drug and Placebo groups
 fig_avg_filtered = px.line(avg_scores_filtered, x='Month', y='Mobility_Score', color='Placebo',
                            labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Average Mobility Score'},
                            title='Average Mobility Scores by Month for Trial Drug and Placebo Groups')
 
-
-### % imrpovement
-filtered_df = df.copy()
-
-# Calculate the average pre-mobility and trial average mobility for filtered patients
-avg_pre_mobility = filtered_df['Pre_Mobility'].mean()
-avg_trial_mobility = filtered_df['Trial_Avg_Mobility'].mean()
-
-# Calculate the percentage change
+# Create a bar chart showing average pre-trial and post-trial mobility scores
+avg_pre_mobility = df['Pre_Mobility'].mean()
+avg_trial_mobility = df['Trial_Avg_Mobility'].mean()
 if avg_pre_mobility != 0:
     percent_change = ((avg_trial_mobility - avg_pre_mobility) / avg_pre_mobility) * 100
 else:
     percent_change = 0
 
-# Create a dataframe to hold this data for visualization
 mobility_data = pd.DataFrame({
     'Mobility Stage': ['Pre-Trial Mobility', 'Post-Trial Mobility'],
     'Average Score': [avg_pre_mobility, avg_trial_mobility]
 })
 
-# Create a bar chart showing average pre-trial and post-trial mobility scores
 fig_mobility = px.bar(mobility_data, 
                       x='Mobility Stage', 
                       y='Average Score', 
                       text=[f"{avg_pre_mobility:.2f}", f"{avg_trial_mobility:.2f}"],
                       labels={'Average Score': 'Average Mobility Score'},
-                      title=f'Average Pre-Trial vs Post-Trial Mobility Scores\n'
-                            f'Percentage Change: {percent_change:.2f}%',
+                      title=f'Average Pre-Trial vs Post-Trial Mobility Scores\nPercentage Change: {percent_change:.2f}%',
                       color_discrete_sequence=['#636EFA', '#EF553B'])
 
-# Map the phases to more descriptive names
-df_mobility['Phase'] = df_mobility['Phase'].map({'Pre_Mobility': 'Pre-Trial Mobility', 'Trial_Avg_Mobility': 'Post-Trial Mobility'})
-
-# Create a box plot to show the distribution of mobility scores
-fig_mobility_distribution = px.box(
-    df_mobility,
-    x='Phase',
-    y='Mobility_Score',
-    color='Placebo',
-    labels={'Mobility_Score': 'Mobility Score', 'Phase': 'Phase'},
-    title='Distribution of Pre-Trial and Post-Trial Mobility Scores by Trial Group'
-)
-
-# Containerizing the two charts
+# Container for displaying the charts
 with st.container():
-    # Adjust column width by specifying different fractions (e.g., 5:5 for equal width)
-    col1, col2 = st.columns([1, 1])  # Equal width for both columns
+    col1, col2 = st.columns([1, 1])
 
-    # Display the bar chart in the first column, using full container width
     with col1:
-        st.plotly_chart(fig1, use_container_width=True)  # Make the chart fill the column width
+        st.plotly_chart(fig1, use_container_width=True)  # Improvement stacked bar chart
 
-    # Display the dynamically updated line chart in the second column, using full container width
     with col2:
-        st.plotly_chart(fig_avg_filtered, use_container_width=True)  # Make the chart fill the column width
+        st.plotly_chart(fig_avg_filtered, use_container_width=True)  # Line chart for mobility scores by month
 
-# Display the chart in a new container
+# New row for the additional charts
 with st.container():
-    # Adjust column width for new row of charts
-    col3, col4 = st.columns([1, 1])  # Equal width for both columns
+    col3, col4 = st.columns([1, 1])
 
-    # Display the percentage improvement on the left as a chart
     with col3:
-        st.plotly_chart(fig_mobility, use_container_width=True)
+        st.plotly_chart(fig_mobility, use_container_width=True)  # Bar chart for pre and post-trial mobility
 
-    # Optionally, keep another chart or analysis on the right
+    # Optionally, add another chart or analysis in col4
     with col4:
-        st.plotly_chart(fig_mobility_distribution, use_container_width=True)
+        st.write("Optional second chart for this section.")  # Placeholder for future analysis
 
-# Add a space before the placebo statement
-st.write("")
 
-# Generate the statement for the placebo group
-placebo_statement = generate_dynamic_statement(df, placebo_group=1, group_name="placebo")
+#######################################################
+#############################################################################################
+ #Calculate the average pre-mobility and trial average mobility for filtered patients
+# avg_pre_mobility = filtered_df['Pre_Mobility'].mean()
+# avg_trial_mobility = filtered_df['Trial_Avg_Mobility'].mean()
+# ###################################
+
+
+
+
+
+# # Calculate the percentage change
+# if avg_pre_mobility != 0:
+#     percent_change = ((avg_trial_mobility - avg_pre_mobility) / avg_pre_mobility) * 100
+# else:
+#     percent_change = 0
+
+# # Create a dataframe to hold this data for visualization
+# mobility_data = pd.DataFrame({
+#     'Mobility Stage': ['Pre-Trial Mobility', 'Post-Trial Mobility'],
+#     'Average Score': [avg_pre_mobility, avg_trial_mobility]
+# })
+# # Generate the statement for the trial drug group
+# trial_drug_statement = generate_dynamic_statement(df, placebo_group=0, group_name="trial drug")
+# # Display the trial drug statement
+
+
+# # Group data by Placebo and Improvement for the first chart
+# grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
+
+# # Calculate the total count for each Placebo group
+# grouped_data['Total'] = grouped_data.groupby('Placebo')['Count'].transform('sum')
+
+# # Calculate the percentage of patients in each group
+# grouped_data['Percentage'] = (grouped_data['Count'] / grouped_data['Total']) * 100
+
+# # Map Improvement values for better labeling
+# grouped_data['Improvement'] = grouped_data['Improvement'].map({0: 'Not Improved', 1: 'Improved'})
+
+# # Map Placebo values for better labeling (0: Trial Drug, 1: Placebo)
+# grouped_data['Placebo'] = grouped_data['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
+
+# # Create the stacked bar chart with percentages and patient count as text on the bars
+# grouped_data['text'] = grouped_data.apply(lambda row: f"{row['Percentage']:.1f}% - {row['Count']} patients", axis=1)
+
+# df_melted_filtered = pd.melt(df, id_vars=['Patient_ID', 'Placebo'], value_vars=month_columns, 
+#                              var_name='Month', value_name='Mobility_Score')
+
+# # Convert 'Placebo' to readable labels
+# df_melted_filtered['Placebo'] = df_melted_filtered['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
+
+# # Calculate the average scores by month for placebo and non-placebo users based on filtered data
+# avg_scores_filtered = df_melted_filtered.groupby(['Placebo', 'Month'])['Mobility_Score'].mean().reset_index()
+
+# # Chart 1: Improvement Based on Placebo and Trial Groups (stacked bar chart)
+# fig1 = px.bar(grouped_data, 
+#              x='Placebo', 
+#              y='Count', 
+#              color='Improvement', 
+#              barmode='stack',  # Stacked bar chart
+#              text=grouped_data['text'],  # Display percentage and patient count
+#              labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
+#              title='Patient Improvement Based on Clinical Trial Groups and Health Factors')
+
+# # Plot the dynamically updated average mobility scores by month (line chart)
+# fig_avg_filtered = px.line(avg_scores_filtered, x='Month', y='Mobility_Score', color='Placebo',
+#                            labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Average Mobility Score'},
+#                            title='Average Mobility Scores by Month for Trial Drug and Placebo Groups')
+
+
+# ### % imrpovement
+# filtered_df = df.copy()
+
+# # Calculate the average pre-mobility and trial average mobility for filtered patients
+# avg_pre_mobility = filtered_df['Pre_Mobility'].mean()
+# avg_trial_mobility = filtered_df['Trial_Avg_Mobility'].mean()
+
+# # Calculate the percentage change
+# if avg_pre_mobility != 0:
+#     percent_change = ((avg_trial_mobility - avg_pre_mobility) / avg_pre_mobility) * 100
+# else:
+#     percent_change = 0
+
+# # Create a dataframe to hold this data for visualization
+# mobility_data = pd.DataFrame({
+#     'Mobility Stage': ['Pre-Trial Mobility', 'Post-Trial Mobility'],
+#     'Average Score': [avg_pre_mobility, avg_trial_mobility]
+# })
+
+# # Create a bar chart showing average pre-trial and post-trial mobility scores
+# fig_mobility = px.bar(mobility_data, 
+#                       x='Mobility Stage', 
+#                       y='Average Score', 
+#                       text=[f"{avg_pre_mobility:.2f}", f"{avg_trial_mobility:.2f}"],
+#                       labels={'Average Score': 'Average Mobility Score'},
+#                       title=f'Average Pre-Trial vs Post-Trial Mobility Scores\n'
+#                             f'Percentage Change: {percent_change:.2f}%',
+#                       color_discrete_sequence=['#636EFA', '#EF553B'])
+
+# # Map the phases to more descriptive names
+# df_mobility['Phase'] = df_mobility['Phase'].map({'Pre_Mobility': 'Pre-Trial Mobility', 'Trial_Avg_Mobility': 'Post-Trial Mobility'})
+
+# # Create a box plot to show the distribution of mobility scores
+# fig_mobility_distribution = px.box(
+#     df_mobility,
+#     x='Phase',
+#     y='Mobility_Score',
+#     color='Placebo',
+#     labels={'Mobility_Score': 'Mobility Score', 'Phase': 'Phase'},
+#     title='Distribution of Pre-Trial and Post-Trial Mobility Scores by Trial Group'
+# )
+
+# # Containerizing the two charts
+# with st.container():
+#     # Adjust column width by specifying different fractions (e.g., 5:5 for equal width)
+#     col1, col2 = st.columns([1, 1])  # Equal width for both columns
+
+#     # Display the bar chart in the first column, using full container width
+#     with col1:
+#         st.plotly_chart(fig1, use_container_width=True)  # Make the chart fill the column width
+
+#     # Display the dynamically updated line chart in the second column, using full container width
+#     with col2:
+#         st.plotly_chart(fig_avg_filtered, use_container_width=True)  # Make the chart fill the column width
+
+# # Display the chart in a new container
+# with st.container():
+#     # Adjust column width for new row of charts
+#     col3, col4 = st.columns([1, 1])  # Equal width for both columns
+
+#     # Display the percentage improvement on the left as a chart
+#     with col3:
+#         st.plotly_chart(fig_mobility, use_container_width=True)
+
+#     # Optionally, keep another chart or analysis on the right
+#     with col4:
+#         st.plotly_chart(fig_mobility_distribution, use_container_width=True)
+
+# # Add a space before the placebo statement
+# st.write("")
+
+# # Generate the statement for the placebo group
+# placebo_statement = generate_dynamic_statement(df, placebo_group=1, group_name="placebo")
 # Display the placebo statement
 st.write(placebo_statement)
+st.write(trial_drug_statement)
 
 
 
