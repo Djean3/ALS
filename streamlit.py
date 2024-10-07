@@ -257,6 +257,22 @@ fig_percent_improvement = px.bar(
     text=avg_percent_improvement['Percent_Improvement'].round(2).astype(str) + '%'
 )
 
+mobility_columns = ['Pre_Mobility', 'Trial_Avg_Mobility']
+df_mobility = df.melt(id_vars=['Patient_ID', 'Placebo'], value_vars=mobility_columns,
+                      var_name='Phase', value_name='Mobility_Score')
+
+# Map the phases to more descriptive names
+df_mobility['Phase'] = df_mobility['Phase'].map({'Pre_Mobility': 'Pre-Trial Mobility', 'Trial_Avg_Mobility': 'Post-Trial Mobility'})
+
+# Create a box plot to show the distribution of mobility scores
+fig_mobility_distribution = px.box(
+    df_mobility,
+    x='Phase',
+    y='Mobility_Score',
+    color='Placebo',
+    labels={'Mobility_Score': 'Mobility Score', 'Phase': 'Phase'},
+    title='Distribution of Pre-Trial and Post-Trial Mobility Scores by Trial Group'
+)
 
 # Containerizing the two charts
 with st.container():
@@ -271,20 +287,17 @@ with st.container():
     with col2:
         st.plotly_chart(fig_avg_filtered, use_container_width=True)  # Make the chart fill the column width
 
-# Container for the new charts at the bottom
 with st.container():
     # Adjust column width for the new row of charts
     col3, col4 = st.columns([1, 1])  # Equal width for both columns
 
-    # Display the new percentage improvement chart on the left
+    # Display the updated percentage improvement chart on the left
     with col3:
         st.plotly_chart(fig_percent_improvement, use_container_width=True)
 
     # Display the mobility score distribution box plot on the right
     with col4:
         st.plotly_chart(fig_mobility_distribution, use_container_width=True)
-
-st.write(trial_drug_statement)
 
 # Add a space before the placebo statement
 st.write("")
