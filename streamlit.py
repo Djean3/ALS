@@ -48,6 +48,22 @@ st.markdown(header)
 ####################
 
 # Column names for months without the "_mobility" suffix
+df.rename(columns={
+    'January_mobility': 'January', 
+    'February_mobility': 'February',
+    'March_mobility': 'March',
+    'April_mobility': 'April',
+    'May_mobility': 'May',
+    'June_mobility': 'June',
+    'July_mobility': 'July',
+    'August_mobility': 'August',
+    'September_mobility': 'September',
+    'October_mobility': 'October',
+    'November_mobility': 'November',
+    'December_mobility': 'December',
+}, inplace=True)
+
+# Now you can melt the DataFrame with simpler month names
 month_columns = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
                  'August', 'September', 'October', 'November', 'December']
 
