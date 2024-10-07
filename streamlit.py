@@ -234,25 +234,33 @@ fig_avg_filtered = px.line(avg_scores_filtered, x='Month', y='Mobility_Score', c
 
 
 ### % imrpovement
-df['Percent_Improvement'] = ((df['Trial_Avg_Mobility'] - df['Pre_Mobility']) / df['Pre_Mobility']) * 100
+filtered_df = df.copy()
 
-# Calculate the overall average percentage improvement across all filtered patients
-average_improvement = df['Percent_Improvement'].mean()
+# Calculate the average pre-mobility and trial average mobility for filtered patients
+avg_pre_mobility = filtered_df['Pre_Mobility'].mean()
+avg_trial_mobility = filtered_df['Trial_Avg_Mobility'].mean()
 
-# Determine whether the result is positive, negative, or neutral
-if average_improvement > 0:
-    improvement_type = "Positive"
-    improvement_color = "green"
-elif average_improvement < 0:
-    improvement_type = "Negative"
-    improvement_color = "red"
+# Calculate the percentage change
+if avg_pre_mobility != 0:
+    percent_change = ((avg_trial_mobility - avg_pre_mobility) / avg_pre_mobility) * 100
 else:
-    improvement_type = "Neutral"
-    improvement_color = "gray"
+    percent_change = 0
 
-mobility_columns = ['Pre_Mobility', 'Trial_Avg_Mobility']
-df_mobility = df.melt(id_vars=['Patient_ID', 'Placebo'], value_vars=mobility_columns,
-                      var_name='Phase', value_name='Mobility_Score')
+# Create a dataframe to hold this data for visualization
+mobility_data = pd.DataFrame({
+    'Mobility Stage': ['Pre-Trial Mobility', 'Post-Trial Mobility'],
+    'Average Score': [avg_pre_mobility, avg_trial_mobility]
+})
+
+# Create a bar chart showing average pre-trial and post-trial mobility scores
+fig_mobility = px.bar(mobility_data, 
+                      x='Mobility Stage', 
+                      y='Average Score', 
+                      text=[f"{avg_pre_mobility:.2f}", f"{avg_trial_mobility:.2f}"],
+                      labels={'Average Score': 'Average Mobility Score'},
+                      title=f'Average Pre-Trial vs Post-Trial Mobility Scores\n'
+                            f'Percentage Change: {percent_change:.2f}%',
+                      color_discrete_sequence=['#636EFA', '#EF553B'])
 
 # Map the phases to more descriptive names
 df_mobility['Phase'] = df_mobility['Phase'].map({'Pre_Mobility': 'Pre-Trial Mobility', 'Trial_Avg_Mobility': 'Post-Trial Mobility'})
@@ -280,20 +288,16 @@ with st.container():
     with col2:
         st.plotly_chart(fig_avg_filtered, use_container_width=True)  # Make the chart fill the column width
 
+# Display the chart in a new container
 with st.container():
-    # Adjust column width for the new row of charts
+    # Adjust column width for new row of charts
     col3, col4 = st.columns([1, 1])  # Equal width for both columns
 
-    # Display the percentage improvement on the left
+    # Display the percentage improvement on the left as a chart
     with col3:
-        # Display as a large number
-        st.markdown(
-            f"<h2 style='color:{improvement_color};'>"
-            f"{improvement_type} Improvement: {average_improvement:.2f}%</h2>", 
-            unsafe_allow_html=True
-        )
+        st.plotly_chart(fig_mobility, use_container_width=True)
 
-    # Display the mobility score distribution box plot on the right
+    # Optionally, keep another chart or analysis on the right
     with col4:
         st.plotly_chart(fig_mobility_distribution, use_container_width=True)
 
