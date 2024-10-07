@@ -199,6 +199,11 @@ grouped_data['Improvement'] = grouped_data['Improvement'].map({0: 'Not Improved'
 grouped_data['Placebo'] = grouped_data['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
 grouped_data['text'] = grouped_data.apply(lambda row: f"{row['Percentage']:.1f}% - {row['Count']} patients", axis=1)
 
+
+
+month_order = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
+               'August', 'September', 'October', 'November', 'December']
+
 # Chart 1: Improvement Based on Placebo and Trial Groups (stacked bar chart)
 fig1 = px.bar(grouped_data, 
              x='Placebo', 
@@ -221,6 +226,8 @@ fig_avg_filtered = px.line(avg_scores_filtered, x='Month', y='Mobility_Score', c
                            labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Average Mobility Score'},
                            title='Average Mobility Scores by Month for Trial Drug and Placebo Groups')
 fig_avg_filtered.update_xaxes(categoryorder='array', categoryarray=month_order)
+
+
 # Create a bar chart showing average pre-trial and post-trial mobility scores
 avg_pre_mobility = df['Pre_Mobility'].mean()
 avg_trial_mobility = df['Trial_Avg_Mobility'].mean()
