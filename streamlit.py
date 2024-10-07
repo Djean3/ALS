@@ -231,7 +231,36 @@ fig_mobility = px.bar(mobility_data,
                       labels={'Average Score': 'Average Mobility Score'},
                       title=f'Average Pre-Trial vs Post-Trial Mobility Scores\nPercentage Change: {percent_change:.2f}%',
                       color_discrete_sequence=['#636EFA', '#EF553B'])
+##########################################
+# Group the data by Gender and Improvement after filters are applied
+filtered_gender_improvement_data = df.groupby(['Sex', 'Improvement']).size().reset_index(name='Count')
 
+# Map gender values for better labeling (0: Female, 1: Male)
+filtered_gender_improvement_data['Sex'] = filtered_gender_improvement_data['Sex'].map({0: 'Female', 1: 'Male'})
+
+# Map Improvement values for better labeling (0: Not Improved, 1: Improved)
+filtered_gender_improvement_data['Improvement'] = filtered_gender_improvement_data['Improvement'].map({0: 'Not Improved', 1: 'Improved'})
+
+# Check the gender filter and adjust the data accordingly
+if gender == 'Male':
+    filtered_gender_improvement_data = filtered_gender_improvement_data[filtered_gender_improvement_data['Sex'] == 'Male']
+elif gender == 'Female':
+    filtered_gender_improvement_data = filtered_gender_improvement_data[filtered_gender_improvement_data['Sex'] == 'Female']
+
+# ---------------------- Pie Chart ----------------------
+fig_gender_pie = px.pie(
+    filtered_gender_improvement_data,
+    names='Sex',
+    values='Count',
+    color='Improvement',
+    title='Gender Distribution of Improvement',
+    hole=0.4,  # Making it a donut chart
+    labels={'Sex': 'Gender', 'Count': 'Number of Patients', 'Improvement': 'Mobility Status'}
+)
+
+
+
+##########################################
 # Container for displaying the charts
 with st.container():
     col1, col2 = st.columns([1, 1])
@@ -251,7 +280,7 @@ with st.container():
 
     # Optionally, add another chart or analysis in col4
     with col4:
-        st.write("Optional second chart for this section.")  # Placeholder for future analysis
+        st.plotly_chart(fig_gender_pie, use_container_width=True)  # Display pie chart
 
 st.write(placebo_statement)
 st.write(trial_drug_statement)
