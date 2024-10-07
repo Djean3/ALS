@@ -145,7 +145,7 @@ def generate_dynamic_statement(df, placebo_group, group_name):
 
     # Create a list of selected filters for display
     selected_filters = []
-    
+    filtered_df = df.copy()
     # Only show filters if "All Patients" is unchecked
     if not all_patients:
         if gender != "All":
@@ -185,6 +185,32 @@ def generate_dynamic_statement(df, placebo_group, group_name):
             f"{filter_str}."
         )
 
+
+
+
+
+
+#############################################################################################
+ #Calculate the average pre-mobility and trial average mobility for filtered patients
+avg_pre_mobility = filtered_df['Pre_Mobility'].mean()
+avg_trial_mobility = filtered_df['Trial_Avg_Mobility'].mean()
+###################################
+
+
+
+
+
+# Calculate the percentage change
+if avg_pre_mobility != 0:
+    percent_change = ((avg_trial_mobility - avg_pre_mobility) / avg_pre_mobility) * 100
+else:
+    percent_change = 0
+
+# Create a dataframe to hold this data for visualization
+mobility_data = pd.DataFrame({
+    'Mobility Stage': ['Pre-Trial Mobility', 'Post-Trial Mobility'],
+    'Average Score': [avg_pre_mobility, avg_trial_mobility]
+})
 # Generate the statement for the trial drug group
 trial_drug_statement = generate_dynamic_statement(df, placebo_group=0, group_name="trial drug")
 # Display the trial drug statement
