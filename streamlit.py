@@ -26,27 +26,6 @@ df = pd.read_csv(url)
 st.markdown(header)
 
 
-
-
-
-##################################DASHBOARD##################################
-
-###### Line chart showing the average mobility score over the course of the trial #####
-# Prepare the data for the line graph
-
-
-#############################################################################
-######## IMPROVEMENT DONUT CHART ##################################
-
-
-
-
-#####################################################################
-
-###################################################################
-
-####################
-
 # Column names for months without the "_mobility" suffix
 df.rename(columns={
     'January_mobility': 'January', 
@@ -232,7 +211,7 @@ placebo_statement = generate_dynamic_statement(df, placebo_group=1, group_name="
 # Display the placebo statement
 st.write(placebo_statement)
 
-# Group data by Placebo and Improvement for the first chart
+# Create the stacked bar chart with percentages and patient count as text on the bars
 grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
 
 # Calculate the total count for each Placebo group
@@ -260,8 +239,22 @@ fig1 = px.bar(grouped_data,
              labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
              title='Patient Improvement Based on Clinical Trial Groups and Health Factors')
 
-# Display the chart in the Streamlit app
-st.plotly_chart(fig1)
+# Containerizing the two charts
+with st.container():
+    col1, col2 = st.columns(2)
+
+    # Display the bar chart in the first column
+    with col1:
+        st.plotly_chart(fig1)  # fig1 now defined before it is used
+
+    # Plot the average mobility scores by month (your other chart)
+    fig_avg = px.line(avg_scores, x='Month', y='Mobility_Score', color='Placebo',
+                      labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Average Mobility Score'},
+                      title='Average Mobility Scores by Month for Trial Drug and Placebo Groups')
+
+    # Display the line chart in the second column
+    with col2:
+        st.plotly_chart(fig_avg)
 
 
 
