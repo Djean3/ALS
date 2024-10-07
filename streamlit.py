@@ -232,6 +232,36 @@ fig_avg_filtered = px.line(avg_scores_filtered, x='Month', y='Mobility_Score', c
                            labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Average Mobility Score'},
                            title='Average Mobility Scores by Month for Trial Drug and Placebo Groups')
 
+
+
+df['Percent_Improvement'] = ((df['Trial_Avg_Mobility'] - df['Pre_Mobility']) / df['Pre_Mobility']) * 100
+
+# Group by Placebo to get the average percentage improvement for Trial Drug and Placebo groups
+avg_percent_improvement = df.groupby('Placebo')['Percent_Improvement'].mean().reset_index()
+avg_percent_improvement['Placebo'] = avg_percent_improvement['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
+
+# Create the horizontal bar chart for percentage improvement
+fig_percent_improvement = px.bar(
+    avg_percent_improvement,
+    x='Percent_Improvement',
+    y='Placebo',
+    orientation='h',  # Horizontal bar chart
+    labels={'Percent_Improvement': 'Average % Improvement', 'Placebo': 'Trial Group'},
+    title='Average Percentage Improvement by Trial Group',
+    text=avg_percent_improvement['Percent_Improvement'].round(2).astype(str) + '%'
+)
+
+# Create a box plot for mobility score distribution by month
+fig_mobility_distribution = px.box(
+    df_melted,
+    x='Month',
+    y='Mobility_Score',
+    color='Placebo',
+    labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Mobility Score'},
+    title='Mobility Score Distribution by Month for Trial and Placebo Groups'
+)
+
+
 # Containerizing the two charts
 with st.container():
     # Adjust column width by specifying different fractions (e.g., 5:5 for equal width)
@@ -245,7 +275,18 @@ with st.container():
     with col2:
         st.plotly_chart(fig_avg_filtered, use_container_width=True)  # Make the chart fill the column width
 
+# Container for the new charts at the bottom
+with st.container():
+    # Adjust column width for the new row of charts
+    col3, col4 = st.columns([1, 1])  # Equal width for both columns
 
+    # Display the new percentage improvement chart on the left
+    with col3:
+        st.plotly_chart(fig_percent_improvement, use_container_width=True)
+
+    # Display the mobility score distribution box plot on the right
+    with col4:
+        st.plotly_chart(fig_mobility_distribution, use_container_width=True)
 
 st.write(trial_drug_statement)
 
