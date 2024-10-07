@@ -236,26 +236,19 @@ fig_avg_filtered = px.line(avg_scores_filtered, x='Month', y='Mobility_Score', c
 ### % imrpovement
 df['Percent_Improvement'] = ((df['Trial_Avg_Mobility'] - df['Pre_Mobility']) / df['Pre_Mobility']) * 100
 
-# Ensure there are no NaN values or invalid calculations
-df['Percent_Improvement'].fillna(0, inplace=True)
+# Calculate the overall average percentage improvement across all filtered patients
+average_improvement = df['Percent_Improvement'].mean()
 
-# Group by Placebo to get the average percentage improvement for both groups
-avg_percent_improvement = df.groupby('Placebo')['Percent_Improvement'].mean().reset_index()
-avg_percent_improvement['Placebo'] = avg_percent_improvement['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
-
-# Filter out invalid or missing values
-avg_percent_improvement = avg_percent_improvement[avg_percent_improvement['Percent_Improvement'].notna()]
-
-# Create the horizontal bar chart for percentage improvement
-fig_percent_improvement = px.bar(
-    avg_percent_improvement,
-    x='Percent_Improvement',
-    y='Placebo',
-    orientation='h',  # Horizontal bar chart
-    labels={'Percent_Improvement': 'Average % Improvement', 'Placebo': 'Trial Group'},
-    title='Average Percentage Improvement by Trial Group',
-    text=avg_percent_improvement['Percent_Improvement'].round(2).astype(str) + '%'
-)
+# Determine whether the result is positive, negative, or neutral
+if average_improvement > 0:
+    improvement_type = "Positive"
+    improvement_color = "green"
+elif average_improvement < 0:
+    improvement_type = "Negative"
+    improvement_color = "red"
+else:
+    improvement_type = "Neutral"
+    improvement_color = "gray"
 
 mobility_columns = ['Pre_Mobility', 'Trial_Avg_Mobility']
 df_mobility = df.melt(id_vars=['Patient_ID', 'Placebo'], value_vars=mobility_columns,
@@ -291,9 +284,14 @@ with st.container():
     # Adjust column width for the new row of charts
     col3, col4 = st.columns([1, 1])  # Equal width for both columns
 
-    # Display the updated percentage improvement chart on the left
+    # Display the percentage improvement on the left
     with col3:
-        st.plotly_chart(fig_percent_improvement, use_container_width=True)
+        # Display as a large number
+        st.markdown(
+            f"<h2 style='color:{improvement_color};'>"
+            f"{improvement_type} Improvement: {average_improvement:.2f}%</h2>", 
+            unsafe_allow_html=True
+        )
 
     # Display the mobility score distribution box plot on the right
     with col4:
