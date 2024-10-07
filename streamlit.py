@@ -218,13 +218,24 @@ fig1 = px.bar(grouped_data,
 df_melted_filtered = pd.melt(df, id_vars=['Patient_ID', 'Placebo'], value_vars=month_columns, 
                              var_name='Month', value_name='Mobility_Score')
 
+# Convert 'Month' to categorical type with the correct order
+df_melted_filtered['Month'] = pd.Categorical(df_melted_filtered['Month'], categories=month_order, ordered=True)
+
+# Map Placebo to readable labels
 df_melted_filtered['Placebo'] = df_melted_filtered['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
+
+# Calculate the average scores by month for placebo and non-placebo groups
 avg_scores_filtered = df_melted_filtered.groupby(['Placebo', 'Month'])['Mobility_Score'].mean().reset_index()
 
 # Line chart: Average mobility scores by month for Trial Drug and Placebo groups
-fig_avg_filtered = px.line(avg_scores_filtered, x='Month', y='Mobility_Score', color='Placebo',
+fig_avg_filtered = px.line(avg_scores_filtered, 
+                           x='Month', 
+                           y='Mobility_Score', 
+                           color='Placebo',
                            labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Average Mobility Score'},
                            title='Average Mobility Scores by Month for Trial Drug and Placebo Groups')
+
+# Ensure the months are displayed in the correct order on the x-axis
 fig_avg_filtered.update_xaxes(categoryorder='array', categoryarray=month_order)
 
 
