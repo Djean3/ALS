@@ -247,17 +247,23 @@ if gender == 'Male':
 elif gender == 'Female':
     filtered_gender_improvement_data = filtered_gender_improvement_data[filtered_gender_improvement_data['Sex'] == 'Female']
 
+# Define color mapping when all genders are selected
+if gender == 'All':
+    color_map = {'Male': '#1f77b4', 'Female': '#aec7e8'}  # Dark blue and light blue
+else:
+    color_map = None  # Let Plotly use default colors if a specific gender is selected
+
 # ---------------------- Pie Chart ----------------------
 fig_gender_pie = px.pie(
     filtered_gender_improvement_data,
     names='Sex',
     values='Count',
-    color='Improvement',
+    color='Sex',
     title='Gender Distribution of Improvement',
     hole=0.4,  # Making it a donut chart
+    color_discrete_map=color_map,  # Apply custom colors when all genders are selected
     labels={'Sex': 'Gender', 'Count': 'Number of Patients', 'Improvement': 'Mobility Status'}
 )
-
 
 
 ##########################################
