@@ -18,15 +18,14 @@ _This survey has no medical value and was created with synthetic data for demons
 """
 
 
-url = "https://raw.githubusercontent.com/Djean3/ALS/main/ALS_trial_data.csv"
+import plotly.express as px
+import streamlit as st
 
-# Read the CSV file into a DataFrame
+# Load the CSV from the URL
+url = "https://raw.githubusercontent.com/Djean3/ALS/main/ALS_trial_data.csv"
 df = pd.read_csv(url)
 
-st.markdown(header)
-
-
-# Column names for months without the "_mobility" suffix
+# Rename the month columns for better readability
 df.rename(columns={
     'January_mobility': 'January', 
     'February_mobility': 'February',
@@ -42,13 +41,12 @@ df.rename(columns={
     'December_mobility': 'December',
 }, inplace=True)
 
-# Now you can melt the DataFrame with simpler month names
+# Melt the DataFrame for easier plotting
 month_columns = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
                  'August', 'September', 'October', 'November', 'December']
 
-# Reshape the data for easier plotting
 df_melted = pd.melt(df, id_vars=['Patient_ID', 'Placebo'], value_vars=month_columns, 
-                      var_name='Month', value_name='Mobility_Score')
+                    var_name='Month', value_name='Mobility_Score')
 
 # Convert 'Placebo' to readable labels
 df_melted['Placebo'] = df_melted['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
@@ -56,25 +54,7 @@ df_melted['Placebo'] = df_melted['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
 # Calculate the average scores by month for placebo and non-placebo users
 avg_scores = df_melted.groupby(['Placebo', 'Month'])['Mobility_Score'].mean().reset_index()
 
-# Plot the average scores by month for placebo and non-placebo groups with updated labels
-fig_avg = px.line(avg_scores, x='Month', y='Mobility_Score', color='Placebo',
-                  labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Average Mobility Score'},
-                  title='Average Mobility Scores by Month for Trial Drug and Placebo Groups')
-
-# Display the plot in the Streamlit app
-# Containerizing the two charts
-with st.container():
-    col1, col2 = st.columns(2)
-    
-    # Display the bar chart in the first column
-    with col1:
-        st.plotly_chart(fig1)  # fig1 refers to the stacked bar chart you already created
-    
-    # Display the line chart in the second column
-    with col2:
-        st.plotly_chart(fig_avg)
-
-# Existing filter setup (with "All Patients" checkbox)
+# Add overweight and obese filters
 df['Overweight'] = df['BMI'].apply(lambda x: 1 if x > 25 else 0)
 df['Obese'] = df['BMI'].apply(lambda x: 1 if x > 30 else 0)
 
@@ -153,7 +133,6 @@ def generate_dynamic_statement(df, placebo_group, group_name):
     group_df = df[df['Placebo'] == placebo_group]
     total_patients = group_df.shape[0]
     improved_patients = group_df[group_df['Improvement'] == 1].shape[0]
-    no_improvement_patients = total_patients - improved_patients
 
     # Calculate improvement percentage
     if total_patients > 0:
@@ -211,7 +190,7 @@ placebo_statement = generate_dynamic_statement(df, placebo_group=1, group_name="
 # Display the placebo statement
 st.write(placebo_statement)
 
-# Create the stacked bar chart with percentages and patient count as text on the bars
+# Group data by Placebo and Improvement for the first chart
 grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='Count')
 
 # Calculate the total count for each Placebo group
@@ -229,7 +208,7 @@ grouped_data['Placebo'] = grouped_data['Placebo'].map({0: 'Trial Drug', 1: 'Plac
 # Create the stacked bar chart with percentages and patient count as text on the bars
 grouped_data['text'] = grouped_data.apply(lambda row: f"{row['Percentage']:.1f}% - {row['Count']} patients", axis=1)
 
-# Chart 1: Improvement Based on Placebo and Trial Groups
+# Chart 1: Improvement Based on Placebo and Trial Groups (stacked bar chart)
 fig1 = px.bar(grouped_data, 
              x='Placebo', 
              y='Count', 
@@ -239,23 +218,22 @@ fig1 = px.bar(grouped_data,
              labels={'Count': 'Number of Patients', 'Placebo': 'Trial Group'},
              title='Patient Improvement Based on Clinical Trial Groups and Health Factors')
 
+# Plot the average mobility scores by month (line chart)
+fig_avg = px.line(avg_scores, x='Month', y='Mobility_Score', color='Placebo',
+                  labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Average Mobility Score'},
+                  title='Average Mobility Scores by Month for Trial Drug and Placebo Groups')
+
 # Containerizing the two charts
 with st.container():
     col1, col2 = st.columns(2)
 
     # Display the bar chart in the first column
     with col1:
-        st.plotly_chart(fig1)  # fig1 now defined before it is used
-
-    # Plot the average mobility scores by month (your other chart)
-    fig_avg = px.line(avg_scores, x='Month', y='Mobility_Score', color='Placebo',
-                      labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Average Mobility Score'},
-                      title='Average Mobility Scores by Month for Trial Drug and Placebo Groups')
+        st.plotly_chart(fig1)  # fig1 is properly defined above
 
     # Display the line chart in the second column
     with col2:
         st.plotly_chart(fig_avg)
-
 
 
 
