@@ -173,7 +173,7 @@ grouped_data = df.groupby(['Placebo', 'Improvement']).size().reset_index(name='C
 grouped_data['Total'] = grouped_data.groupby('Placebo')['Count'].transform('sum')
 grouped_data['Percentage'] = (grouped_data['Count'] / grouped_data['Total']) * 100
 grouped_data['Improvement'] = grouped_data['Improvement'].map({0: 'Not Improved', 1: 'Improved'})
-grouped_data['Placebo'] = grouped_data['Placebo'].map({0: 'Trial Drug', 1:
+grouped_data['Placebo'] = grouped_data['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
 grouped_data['text'] = grouped_data.apply(lambda row: f"{row['Percentage']:.1f}% - {row['Count']} patients", axis=1)
 
 # Chart 1: Improvement Based on Placebo and Trial Groups (stacked bar chart)
@@ -239,6 +239,32 @@ with st.container():
     # Optionally, add another chart or analysis in col4
     with col4:
         st.write("Optional second chart for this section.")  # Placeholder for future analysis
+
+st.write(placebo_statement)
+st.write(trial_drug_statement)
+st.write("ALS Trial Data")
+st.dataframe(df)
+# Markdown data dictionary
+data_dictionary = """
+### Data Dictionary
+
+- **Patient_ID**: A unique identifier for each patient.
+- **Placebo**: Indicates if the patient received a placebo (1 = Yes, 0 = No).
+- **Family_History**: Indicates if the patient has a family history of the disease (1 = Yes, 0 = No).
+- **Prior_Serious_Health_Issues**: Indicates if the patient had serious health issues prior to the trial (1 = Yes, 0 = No).
+- **Sex**: Gender of the patient (0 = Female, 1 = Male).
+- **Height_in_inches**: The height of the patient in inches.
+- **Weight_in_pounds**: The weight of the patient in pounds.
+- **Smoker**: Indicates if the patient is a smoker (1 = Yes, 0 = No).
+- **Diagnosis_Length_months**: The length of time since diagnosis in months.
+- **Pre_Mobility**: The patient’s mobility score before the trial.
+- **Trial_Avg_Mobility**: The average mobility score of the patient across all months of the trial.
+- **Improvement**: Indicates if the patient showed improvement in mobility (1 = Yes, 0 = No).
+"""
+
+# Add the markdown to the app
+st.markdown(data_dictionary)
+
 
 
 #######################################################
@@ -385,8 +411,7 @@ with st.container():
 # # Generate the statement for the placebo group
 # placebo_statement = generate_dynamic_statement(df, placebo_group=1, group_name="placebo")
 # Display the placebo statement
-st.write(placebo_statement)
-st.write(trial_drug_statement)
+
 
 
 
