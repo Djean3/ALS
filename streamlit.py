@@ -233,12 +233,18 @@ fig_avg_filtered = px.line(avg_scores_filtered, x='Month', y='Mobility_Score', c
                            title='Average Mobility Scores by Month for Trial Drug and Placebo Groups')
 
 
-
+### % imrpovement
 df['Percent_Improvement'] = ((df['Trial_Avg_Mobility'] - df['Pre_Mobility']) / df['Pre_Mobility']) * 100
 
-# Group by Placebo to get the average percentage improvement for Trial Drug and Placebo groups
+# Ensure there are no NaN values or invalid calculations
+df['Percent_Improvement'].fillna(0, inplace=True)
+
+# Group by Placebo to get the average percentage improvement for both groups
 avg_percent_improvement = df.groupby('Placebo')['Percent_Improvement'].mean().reset_index()
 avg_percent_improvement['Placebo'] = avg_percent_improvement['Placebo'].map({0: 'Trial Drug', 1: 'Placebo'})
+
+# Filter out invalid or missing values
+avg_percent_improvement = avg_percent_improvement[avg_percent_improvement['Percent_Improvement'].notna()]
 
 # Create the horizontal bar chart for percentage improvement
 fig_percent_improvement = px.bar(
@@ -249,16 +255,6 @@ fig_percent_improvement = px.bar(
     labels={'Percent_Improvement': 'Average % Improvement', 'Placebo': 'Trial Group'},
     title='Average Percentage Improvement by Trial Group',
     text=avg_percent_improvement['Percent_Improvement'].round(2).astype(str) + '%'
-)
-
-# Create a box plot for mobility score distribution by month
-fig_mobility_distribution = px.box(
-    df_melted,
-    x='Month',
-    y='Mobility_Score',
-    color='Placebo',
-    labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Mobility Score'},
-    title='Mobility Score Distribution by Month for Trial and Placebo Groups'
 )
 
 
