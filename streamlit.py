@@ -220,7 +220,7 @@ avg_scores_filtered = df_melted_filtered.groupby(['Placebo', 'Month'])['Mobility
 fig_avg_filtered = px.line(avg_scores_filtered, x='Month', y='Mobility_Score', color='Placebo',
                            labels={'Placebo': 'Trial Group', 'Mobility_Score': 'Average Mobility Score'},
                            title='Average Mobility Scores by Month for Trial Drug and Placebo Groups')
-
+fig_avg_filtered.update_xaxes(categoryorder='array', categoryarray=month_order)
 # Create a bar chart showing average pre-trial and post-trial mobility scores
 avg_pre_mobility = df['Pre_Mobility'].mean()
 avg_trial_mobility = df['Trial_Avg_Mobility'].mean()
