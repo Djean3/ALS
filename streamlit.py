@@ -125,17 +125,20 @@ if not all_pre_mobility:
 
 # Function to generate dynamic statement with clarity on minimal improvements
 def generate_dynamic_statement(df, placebo_group, group_name):
+    # Filter the group data (0: Trial Drug, 1: Placebo)
     group_df = df[df['Placebo'] == placebo_group]
     total_patients = group_df.shape[0]
     improved_patients = group_df[group_df['Improvement'] == 1].shape[0]
 
+    # Calculate improvement percentage
     if total_patients > 0:
         improvement_percentage = (improved_patients / total_patients) * 100
     else:
         improvement_percentage = 0
 
+    # Create a list of selected filters for display
     selected_filters = []
-
+    # Only show filters if "All Patients" is unchecked
     if not all_patients:
         if gender != "All":
             selected_filters.append(f"{gender.lower()} patients")
@@ -154,14 +157,24 @@ def generate_dynamic_statement(df, placebo_group, group_name):
     else:
         selected_filters.append("all patients in the study")
 
-    filter_str = " and ".join([", ".join(selected_filters[:-1]), selected_filters[-1]]) if len(selected_filters) > 1 else selected_filters[0]
+    # Check if there are any selected filters before trying to join them
+    if len(selected_filters) > 1:
+        filter_str = " and ".join([", ".join(selected_filters[:-1]), selected_filters[-1]])
+    elif len(selected_filters) == 1:
+        filter_str = selected_filters[0]
+    else:
+        filter_str = "all patients in the study"
 
+    # Generate the result statement based on the effect
     if improvement_percentage > 50:
         return f"The {group_name} had a positive effect on mobility, with {improvement_percentage:.1f}% improvement for {total_patients} patients {filter_str}."
     elif improvement_percentage == 50:
         return f"The {group_name} had a neutral effect on mobility, with 50% of {total_patients} patients {filter_str} showing improvement."
     else:
-        return f"The {group_name} was ineffective on the selected patients, with only {improvement_percentage:.1f}% ({improved_patients} of {total_patients} patients) experiencing mobility improvement {filter_str}."
+        return (
+            f"The {group_name} was ineffective on the selected patients, with only {improvement_percentage:.1f}% ({improved_patients} of {total_patients} patients) experiencing mobility improvement "
+            f"{filter_str}."
+        )
 
 # Generate statements
 trial_drug_statement = generate_dynamic_statement(df, placebo_group=0, group_name="trial drug")
