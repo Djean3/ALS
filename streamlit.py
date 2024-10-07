@@ -224,10 +224,11 @@ fig_avg_filtered = px.line(avg_scores_filtered, x='Month', y='Mobility_Score', c
 # Create a bar chart showing average pre-trial and post-trial mobility scores
 avg_pre_mobility = df['Pre_Mobility'].mean()
 avg_trial_mobility = df['Trial_Avg_Mobility'].mean()
+
 if avg_pre_mobility != 0:
     percent_change = ((avg_trial_mobility - avg_pre_mobility) / avg_pre_mobility) * 100
 else:
-    percent_change = 0
+    percent_change = 0  # Safeguard against dividing by zero
 
 mobility_data = pd.DataFrame({
     'Mobility Stage': ['Pre-Trial Mobility', 'Post-Trial Mobility'],
