@@ -16,7 +16,7 @@ Scroll down to view detailed patient data and overall trial results.
 
 [Go to Data Dictionary](#data-dictionary)
 
-_This survey has no medical value and was created with synthetic data for demonstration purposes only._
+_This survey has no medical value and was created with synthetic data for demonstration purposes only.__
 """
 
 st.markdown(header)
