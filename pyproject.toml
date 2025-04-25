@@ -3,6 +3,7 @@ name = "als"
 version = "0.1.0"
 description = ""
 authors = ["David Jean <davidejeaniii@gmail.com>"]
+package-mode = false
 readme = "README.md"
 
 [tool.poetry.dependencies]
